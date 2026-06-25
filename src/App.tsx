@@ -16,8 +16,6 @@ const navItems = [
 
 const depthGridCellSize = 48;
 const depthGridRadius = 190;
-const sectionEdgeCooldownMs = 500;
-const mobileBreakpoint = 720;
 const timelineMonthIndex: Record<string, number> = {
   janeiro: 0,
   january: 0,
@@ -74,13 +72,7 @@ function App() {
   const [isPhoneCopied, setIsPhoneCopied] = useState(false);
   const [pointer, setPointer] = useState({ x: -999, y: -999 });
   const [viewport, setViewport] = useState({ width: 0, height: 0 });
-  const portraitSourceRef = useRef<HTMLDivElement | null>(null);
-  const floatingPortraitRef = useRef<HTMLDivElement | null>(null);
   const sectionShellRefs = useRef<Record<string, HTMLDivElement | null>>({});
-  const transitionLockRef = useRef(false);
-  const touchStartYRef = useRef<number | null>(null);
-  const edgeIntentRef = useRef<{ direction: 1 | -1; sectionId: string; at: number } | null>(null);
-  const edgeCooldownRef = useRef<{ direction: 1 | -1; sectionId: string; at: number } | null>(null);
 
   const filteredTimeline = useMemo(
     () =>
@@ -100,7 +92,6 @@ function App() {
     0,
     navItems.findIndex((item) => item.id === activeSection),
   );
-  const isMobileViewport = viewport.width > 0 && viewport.width <= mobileBreakpoint;
   const isPhotoPinned = activeSection !== "inicio";
   const depthGridCells = useMemo(() => {
     if (!viewport.width || !viewport.height) return [];
@@ -155,71 +146,12 @@ function App() {
     return () => window.clearTimeout(timeoutId);
   }, [isPhoneCopied]);
 
-  const canLeaveSection = (direction: 1 | -1) => {
-    const shell = sectionShellRefs.current[activeSection];
-    if (!shell) return true;
-
-    const threshold = 2;
-    const isAtTop = shell.scrollTop <= threshold;
-    const isAtBottom = shell.scrollTop + shell.clientHeight >= shell.scrollHeight - threshold;
-
-    return direction > 0 ? isAtBottom : isAtTop;
-  };
-
-  const prepareSectionEntry = (sectionId: SectionId, direction: 1 | -1) => {
-    const shell = sectionShellRefs.current[sectionId];
-    if (!shell) return;
-
-    shell.scrollTop = direction > 0 ? 0 : Math.max(0, shell.scrollHeight - shell.clientHeight);
-  };
-
   const moveToSection = (nextIndex: number) => {
-    if (transitionLockRef.current) return;
     if (nextIndex < 0 || nextIndex >= navItems.length || nextIndex === activeSectionIndex) return;
 
-    const direction = nextIndex > activeSectionIndex ? 1 : -1;
     const nextSection = navItems[nextIndex].id;
-
-    if (isMobileViewport) {
-      setActiveSection(nextSection);
-      document.getElementById(nextSection)?.scrollIntoView({ behavior: "smooth", block: "start" });
-      return;
-    }
-
-    prepareSectionEntry(nextSection, direction);
-    transitionLockRef.current = true;
     setActiveSection(nextSection);
-    window.setTimeout(() => {
-      transitionLockRef.current = false;
-    }, 760);
-  };
-
-  const consumeSectionScroll = (deltaY: number) => {
-    const shell = sectionShellRefs.current[activeSection];
-    if (!shell) return false;
-
-    const threshold = 2;
-    const isMovingDown = deltaY > 0;
-    const isAtTop = shell.scrollTop <= threshold;
-    const isAtBottom = shell.scrollTop + shell.clientHeight >= shell.scrollHeight - threshold;
-    const canScrollInside = isMovingDown ? !isAtBottom : !isAtTop;
-
-    if (!canScrollInside) return false;
-    shell.scrollTop += deltaY;
-    edgeIntentRef.current = null;
-
-    const reachedTop = shell.scrollTop <= threshold;
-    const reachedBottom = shell.scrollTop + shell.clientHeight >= shell.scrollHeight - threshold;
-
-    if ((isMovingDown && reachedBottom) || (!isMovingDown && reachedTop)) {
-      edgeCooldownRef.current = {
-        direction: isMovingDown ? 1 : -1,
-        sectionId: activeSection,
-        at: Date.now(),
-      };
-    }
-
-    return true;
+    document.getElementById(nextSection)?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
   const handleCopyPhone = async () => {
@@ -251,103 +183,15 @@ function App() {
   }, []);
 
   useEffect(() => {
-    if (isMobileViewport) return;
-
-    const onWheel = (event: WheelEvent) => {
-      if (isCvViewerOpen) return;
-      if (Math.abs(event.deltaY) < 28) return;
-      const direction = event.deltaY > 0 ? 1 : -1;
-      event.preventDefault();
-      if (consumeSectionScroll(event.deltaY)) return;
-
-      if (!canLeaveSection(direction)) return;
-
-      const now = Date.now();
-      const edgeCooldown = edgeCooldownRef.current;
-      const isCoolingDown =
-        edgeCooldown &&
-        edgeCooldown.direction === direction &&
-        edgeCooldown.sectionId === activeSection &&
-        now - edgeCooldown.at < sectionEdgeCooldownMs;
-
-      if (isCoolingDown) {
-        edgeIntentRef.current = null;
-        return;
-      }
-
-      edgeCooldownRef.current = null;
-
-      const lastIntent = edgeIntentRef.current;
-      const sameEdgeIntent =
-        lastIntent &&
-        lastIntent.direction === direction &&
-        lastIntent.sectionId === activeSection &&
-        now - lastIntent.at < 650;
-
-      if (!sameEdgeIntent) {
-        edgeIntentRef.current = { direction, sectionId: activeSection, at: now };
-        return;
-      }
-
-      edgeIntentRef.current = null;
-      moveToSection(activeSectionIndex + direction);
-    };
-
     const onKeyDown = (event: KeyboardEvent) => {
-      if (isCvViewerOpen) {
-        if (event.key === "Escape") setIsCvViewerOpen(false);
-        return;
-      }
-
-      if (event.key === "ArrowDown" || event.key === "PageDown") {
-        edgeIntentRef.current = null;
-        if (!canLeaveSection(1)) return;
-        event.preventDefault();
-        moveToSection(activeSectionIndex + 1);
-      }
-
-      if (event.key === "ArrowUp" || event.key === "PageUp") {
-        edgeIntentRef.current = null;
-        if (!canLeaveSection(-1)) return;
-        event.preventDefault();
-        moveToSection(activeSectionIndex - 1);
-      }
+      if (isCvViewerOpen && event.key === "Escape") setIsCvViewerOpen(false);
     };
 
-    const onTouchStart = (event: TouchEvent) => {
-      if (isCvViewerOpen) return;
-      touchStartYRef.current = event.touches[0]?.clientY ?? null;
-    };
-
-    const onTouchEnd = (event: TouchEvent) => {
-      if (isCvViewerOpen) return;
-      if (touchStartYRef.current === null) return;
-      const endY = event.changedTouches[0]?.clientY ?? touchStartYRef.current;
-      const deltaY = touchStartYRef.current - endY;
-      touchStartYRef.current = null;
-      if (Math.abs(deltaY) < 48) return;
-      const direction = deltaY > 0 ? 1 : -1;
-      edgeIntentRef.current = null;
-      if (!canLeaveSection(direction)) return;
-      moveToSection(activeSectionIndex + direction);
-    };
-
-    window.addEventListener("wheel", onWheel, { passive: false });
     window.addEventListener("keydown", onKeyDown);
-    window.addEventListener("touchstart", onTouchStart, { passive: true });
-    window.addEventListener("touchend", onTouchEnd, { passive: true });
-
-    return () => {
-      window.removeEventListener("wheel", onWheel);
-      window.removeEventListener("keydown", onKeyDown);
-      window.removeEventListener("touchstart", onTouchStart);
-      window.removeEventListener("touchend", onTouchEnd);
-    };
-  }, [activeSectionIndex, isCvViewerOpen, isMobileViewport]);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [isCvViewerOpen]);
 
   useEffect(() => {
-    if (!isMobileViewport) return;
-
     const observer = new IntersectionObserver(
       (entries) => {
         const visibleEntry = entries
@@ -358,8 +202,8 @@ function App() {
         setActiveSection(visibleEntry.target.id as SectionId);
       },
       {
-        rootMargin: "-30% 0px -45%",
-        threshold: [0.18, 0.36, 0.52],
+        rootMargin: "-34% 0px -44%",
+        threshold: [0.16, 0.32, 0.5],
       },
     );
 
@@ -369,35 +213,7 @@ function App() {
     });
 
     return () => observer.disconnect();
-  }, [isMobileViewport]);
-
-  useEffect(() => {
-    if (!isPhotoPinned || !portraitSourceRef.current || !floatingPortraitRef.current) return;
-
-    const sourceRect = portraitSourceRef.current.getBoundingClientRect();
-    const targetRect = floatingPortraitRef.current.getBoundingClientRect();
-    const deltaX = sourceRect.left - targetRect.left;
-    const deltaY = sourceRect.top - targetRect.top;
-    const scaleX = sourceRect.width / targetRect.width;
-    const scaleY = sourceRect.height / targetRect.height;
-
-    floatingPortraitRef.current.animate(
-      [
-        {
-          opacity: 0.96,
-          transform: `translate(${deltaX}px, ${deltaY}px) scale(${scaleX}, ${scaleY})`,
-        },
-        {
-          opacity: 1,
-          transform: "translate(0, 0) scale(1, 1)",
-        },
-      ],
-      {
-        duration: 720,
-        easing: "cubic-bezier(0.22, 1, 0.36, 1)",
-      },
-    );
-  }, [isPhotoPinned]);
+  }, []);
 
   return (
     <>
@@ -439,10 +255,7 @@ function App() {
               className={`rail-item ${activeSection === item.id ? "is-active" : ""}`}
               key={item.id}
               type="button"
-              onClick={() => {
-                edgeIntentRef.current = null;
-                moveToSection(index);
-              }}
+              onClick={() => moveToSection(index)}
             >
               <span className="rail-dot" />
               <span className="rail-label">{copy.nav[item.id]}</span>
@@ -451,11 +264,7 @@ function App() {
         </div>
       </aside>
 
-      <div
-        ref={floatingPortraitRef}
-        className={`floating-portrait ${isPhotoPinned ? "is-visible" : ""}`}
-        aria-hidden={!isPhotoPinned}
-      >
+      <div className={`floating-portrait ${isPhotoPinned ? "is-visible" : ""}`} aria-hidden={!isPhotoPinned}>
         <img
           className="floating-portrait-photo"
           src="/images/fotografia/fotografia.jpg"
@@ -490,7 +299,7 @@ function App() {
           </div>
 
           <aside className="identity-panel" aria-label={copy.hero.identityLabel} data-reveal>
-            <div ref={portraitSourceRef} className="portrait-card">
+            <div className="portrait-card">
               <div className="portrait-grid" />
               <img
                 className="portrait-photo"

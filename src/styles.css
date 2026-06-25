@@ -42,7 +42,7 @@ body {
     radial-gradient(circle at 18% 16%, rgba(255, 118, 95, 0.28), transparent 30%),
     radial-gradient(circle at 78% 10%, rgba(216, 154, 82, 0.16), transparent 26%),
     linear-gradient(180deg, #20252c 0%, #13161a 54%, #0e1013 100%);
-  overflow: hidden;
+  overflow-x: hidden;
 }
 
 body::before {
@@ -367,39 +367,34 @@ button {
 }
 
 .screen-section {
-  position: absolute;
-  inset: 0;
-  opacity: 0;
-  pointer-events: none;
-  transform: scale(0.985);
-  transition:
-    opacity 520ms ease,
-    transform 520ms ease;
+  position: relative;
+  min-height: 100svh;
+  scroll-margin-top: 12px;
+  opacity: 1;
+  pointer-events: auto;
+  transform: none;
 }
 
 .screen-section.is-active {
-  opacity: 1;
-  pointer-events: auto;
-  transform: scale(1);
-  z-index: 2;
+  z-index: auto;
 }
 
 .screen-section.is-before,
 .screen-section.is-after {
-  z-index: 1;
+  z-index: auto;
 }
 
 main {
   position: relative;
-  height: 100vh;
-  overflow: hidden;
+  min-height: 100vh;
+  overflow: visible;
 }
 
 .section-shell {
-  height: 100vh;
+  min-height: 100svh;
   padding-top: 72px;
   padding-bottom: 72px;
-  overflow: auto;
+  overflow: visible;
   scrollbar-width: none;
 }
 
@@ -408,11 +403,7 @@ main {
 }
 
 .screen-section [data-reveal] {
-  opacity: 0;
-  transform: translateY(18px);
-  transition:
-    opacity 460ms ease,
-    transform 460ms ease;
+  animation: sectionRise 520ms ease both;
 }
 
 .screen-section.is-active [data-reveal] {
@@ -420,17 +411,16 @@ main {
   transform: translateY(0);
 }
 
-.screen-section.is-active .hero-copy {
-  transition-delay: 120ms;
-}
+@keyframes sectionRise {
+  from {
+    opacity: 0.86;
+    transform: translateY(12px);
+  }
 
-.screen-section.is-active .identity-panel,
-.screen-section.is-active .timeline,
-.screen-section.is-active .project-toolbar,
-.screen-section.is-active .project-grid,
-.screen-section.is-active .cv-section-layout,
-.screen-section.is-active .contact-section {
-  transition-delay: 200ms;
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .hero {
