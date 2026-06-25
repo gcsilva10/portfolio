@@ -9,7 +9,9 @@ type ProjectItemProps = {
 
 export function ProjectItem({ project, typeLabels, websiteButtonLabel, index }: ProjectItemProps) {
   return (
-    <article className="project-card" data-reveal>
+    <article className={`project-card ${project.imagePath ? "has-logo" : ""}`} data-reveal>
+      {project.imagePath ? <img className="project-logo" src={project.imagePath} alt={project.company ?? project.title} /> : null}
+
       <div className="project-card-aside">
         <span className="project-number">{String(index + 1).padStart(2, "0")}</span>
         <span className="project-type">{typeLabels[project.type]}</span>

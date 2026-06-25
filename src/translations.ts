@@ -20,6 +20,7 @@ export type ProjectItemData = {
   description: string;
   frameworks: string[];
   company?: string;
+  imagePath?: string;
   websiteUrl?: string;
 };
 
@@ -168,39 +169,42 @@ export const translations = {
       websiteButton: "Ver website",
       projects: [
         {
-          title: "Personal Dashboard",
+          title: "Dashboard Pessoal",
           type: "pessoal",
           description: "Website pessoal para organizar horários, tarefas, finanças e mais.",
           frameworks: ["React", "TypeScript"],
         },
         {
-          title: "MetroBus Schedule",
+          title: "Website de Horários do MetroBus",
           type: "pessoal",
           description: "Website com cerca de 200 utilizadores por semana, com horários e rotas de autocarros em tempo real.",
           frameworks: ["Next.js", "Maps", "API"],
           websiteUrl: "https://metrobus-horarios.vercel.app",
         },
         {
-          title: "Vacation Management System",
+          title: "Sistema de Gestão de Férias",
           type: "emprego",
           description: "Desenvolvimento do frontend de uma plataforma de gestão de férias para colaboradores.",
           frameworks: ["React", "TypeScript"],
           company: "ENSO ORIGINS",
+          imagePath: "/images/icons/enso.png",
         },
         {
-          title: "NEI Website",
+          title: "Website do NEI",
           type: "emprego",
           description: "Refatoração da codebase do website, com melhorias de performance e experiência de utilização.",
           frameworks: ["Next.js", "Maps", "API"],
           websiteUrl: "https://nei.dei.uc.pt/",
           company: "NEI",
+          imagePath: "/images/icons/nei.png",
         },
         {
-          title: "Manajer Project",
+          title: "Projeto Manajer",
           type: "emprego",
           description: "Implementação de páginas e componentes no website, melhorando a funcionalidade e a experiência geral.",
           frameworks: ["Next.js", "Maps", "API"],
           company: "JeKnowledge",
+          imagePath: "/images/icons/jek.png",
         },
         {
           title: "Acorda",
@@ -209,6 +213,7 @@ export const translations = {
           frameworks: ["Tailwind CSS", "React"],
           websiteUrl: "https://acordacellofestival.com/",
           company: "JeKnowledge",
+          imagePath: "/images/icons/jek.png",
         },
         {
           title: "Projeto Python",
@@ -429,6 +434,7 @@ export const translations = {
           description: "Frontend development for a company vacation management platform.",
           frameworks: ["React", "TypeScript"],
           company: "ENSO ORIGINS",
+          imagePath: "/images/icons/enso.png",
         },
         {
           title: "NEI Website",
@@ -437,6 +443,7 @@ export const translations = {
           frameworks: ["Next.js", "Maps", "API"],
           websiteUrl: "https://nei.dei.uc.pt/",
           company: "NEI",
+          imagePath: "/images/icons/nei.png",
         },
         {
           title: "Manajer Project",
@@ -444,6 +451,7 @@ export const translations = {
           description: "Implementation of several website pages and components, improving functionality and overall experience.",
           frameworks: ["Next.js", "Maps", "API"],
           company: "JeKnowledge",
+          imagePath: "/images/icons/jek.png",
         },
         {
           title: "Acorda",
@@ -452,6 +460,7 @@ export const translations = {
           frameworks: ["Tailwind CSS", "React"],
           websiteUrl: "https://acordacellofestival.com/",
           company: "JeKnowledge",
+          imagePath: "/images/icons/jek.png",
         },
         {
           title: "Python Project",

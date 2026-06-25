@@ -16,6 +16,7 @@ const navItems = [
 
 const depthGridCellSize = 48;
 const depthGridRadius = 190;
+const sectionEdgeCooldownMs = 500;
 
 function App() {
   const [language, setLanguage] = useState<Language>("pt");
@@ -37,6 +38,7 @@ function App() {
   const transitionLockRef = useRef(false);
   const touchStartYRef = useRef<number | null>(null);
   const edgeIntentRef = useRef<{ direction: 1 | -1; sectionId: string; at: number } | null>(null);
+  const edgeCooldownRef = useRef<{ direction: 1 | -1; sectionId: string; at: number } | null>(null);
 
   const filteredTimeline = useMemo(
     () => timeline.filter((entry) => entry.timelineType === timelineFilter),
@@ -150,6 +152,18 @@ function App() {
     if (!canScrollInside) return false;
     shell.scrollTop += deltaY;
     edgeIntentRef.current = null;
+
+    const reachedTop = shell.scrollTop <= threshold;
+    const reachedBottom = shell.scrollTop + shell.clientHeight >= shell.scrollHeight - threshold;
+
+    if ((isMovingDown && reachedBottom) || (!isMovingDown && reachedTop)) {
+      edgeCooldownRef.current = {
+        direction: isMovingDown ? 1 : -1,
+        sectionId: activeSection,
+        at: Date.now(),
+      };
+    }
+
     return true;
   };
 
@@ -192,6 +206,20 @@ function App() {
       if (!canLeaveSection(direction)) return;
 
       const now = Date.now();
+      const edgeCooldown = edgeCooldownRef.current;
+      const isCoolingDown =
+        edgeCooldown &&
+        edgeCooldown.direction === direction &&
+        edgeCooldown.sectionId === activeSection &&
+        now - edgeCooldown.at < sectionEdgeCooldownMs;
+
+      if (isCoolingDown) {
+        edgeIntentRef.current = null;
+        return;
+      }
+
+      edgeCooldownRef.current = null;
+
       const lastIntent = edgeIntentRef.current;
       const sameEdgeIntent =
         lastIntent &&

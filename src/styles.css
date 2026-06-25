@@ -852,6 +852,19 @@ h3 {
     box-shadow 260ms ease;
 }
 
+.project-logo {
+  position: absolute;
+  top: 20px;
+  right: 22px;
+  z-index: 1;
+  width: auto;
+  height: auto;
+  max-width: 82px;
+  max-height: 48px;
+  object-fit: contain;
+  object-position: right top;
+}
+
 .project-card:hover {
   border-color: rgba(255, 118, 95, 0.36);
   background:
@@ -890,6 +903,10 @@ h3 {
   gap: 22px;
   align-content: space-between;
   padding: 22px;
+}
+
+.project-card.has-logo .project-card-main {
+  padding-right: 126px;
 }
 
 .project-company {
@@ -1330,6 +1347,20 @@ footer {
   .project-card {
     grid-template-columns: 1fr;
     min-height: 0;
+  }
+
+  .project-card.has-logo .project-card-main {
+    padding-right: 22px;
+    padding-top: 78px;
+  }
+
+  .project-logo {
+    top: 18px;
+    left: 18px;
+    right: auto;
+    max-width: 74px;
+    max-height: 42px;
+    object-position: left top;
   }
 
   .project-card-aside {
