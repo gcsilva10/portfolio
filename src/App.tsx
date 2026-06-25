@@ -17,6 +17,48 @@ const navItems = [
 const depthGridCellSize = 48;
 const depthGridRadius = 190;
 const sectionEdgeCooldownMs = 500;
+const mobileBreakpoint = 720;
+const timelineMonthIndex: Record<string, number> = {
+  janeiro: 0,
+  january: 0,
+  fevereiro: 1,
+  february: 1,
+  marco: 2,
+  março: 2,
+  march: 2,
+  abril: 3,
+  april: 3,
+  maio: 4,
+  may: 4,
+  junho: 5,
+  june: 5,
+  julho: 6,
+  july: 6,
+  agosto: 7,
+  august: 7,
+  setembro: 8,
+  september: 8,
+  outubro: 9,
+  october: 9,
+  novembro: 10,
+  november: 10,
+  dezembro: 11,
+  december: 11,
+};
+
+function getTimelineDateValue(date: string) {
+  const normalizedDate = date.trim().toLowerCase();
+  if (normalizedDate === "presente" || normalizedDate === "present") return Number.POSITIVE_INFINITY;
+
+  const yearMatch = normalizedDate.match(/\d{4}/);
+  if (!yearMatch) return 0;
+
+  const year = Number(yearMatch[0]);
+  const monthName = normalizedDate.replace(yearMatch[0], "").trim();
+  const month = timelineMonthIndex[monthName] ?? 11;
+
+  return year * 12 + month;
+}
 
 function App() {
   const [language, setLanguage] = useState<Language>("pt");
@@ -41,7 +83,13 @@ function App() {
   const edgeCooldownRef = useRef<{ direction: 1 | -1; sectionId: string; at: number } | null>(null);
 
   const filteredTimeline = useMemo(
-    () => timeline.filter((entry) => entry.timelineType === timelineFilter),
+    () =>
+      [...timeline.filter((entry) => entry.timelineType === timelineFilter)].sort((left, right) => {
+          const endDifference = getTimelineDateValue(right.endDate) - getTimelineDateValue(left.endDate);
+          if (endDifference !== 0) return endDifference;
+
+          return getTimelineDateValue(right.startDate) - getTimelineDateValue(left.startDate);
+        }),
     [timelineFilter, timeline],
   );
   const filteredProjects = useMemo(
@@ -52,6 +100,7 @@ function App() {
     0,
     navItems.findIndex((item) => item.id === activeSection),
   );
+  const isMobileViewport = viewport.width > 0 && viewport.width <= mobileBreakpoint;
   const isPhotoPinned = activeSection !== "inicio";
   const depthGridCells = useMemo(() => {
     if (!viewport.width || !viewport.height) return [];
@@ -131,6 +180,12 @@ function App() {
     const direction = nextIndex > activeSectionIndex ? 1 : -1;
     const nextSection = navItems[nextIndex].id;
 
+    if (isMobileViewport) {
+      setActiveSection(nextSection);
+      document.getElementById(nextSection)?.scrollIntoView({ behavior: "smooth", block: "start" });
+      return;
+    }
+
     prepareSectionEntry(nextSection, direction);
     transitionLockRef.current = true;
     setActiveSection(nextSection);
@@ -196,6 +251,8 @@ function App() {
   }, []);
 
   useEffect(() => {
+    if (isMobileViewport) return;
+
     const onWheel = (event: WheelEvent) => {
       if (isCvViewerOpen) return;
       if (Math.abs(event.deltaY) < 28) return;
@@ -286,7 +343,33 @@ function App() {
       window.removeEventListener("touchstart", onTouchStart);
       window.removeEventListener("touchend", onTouchEnd);
     };
-  }, [activeSectionIndex, isCvViewerOpen]);
+  }, [activeSectionIndex, isCvViewerOpen, isMobileViewport]);
+
+  useEffect(() => {
+    if (!isMobileViewport) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visibleEntry = entries
+          .filter((entry) => entry.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+
+        if (!visibleEntry?.target.id) return;
+        setActiveSection(visibleEntry.target.id as SectionId);
+      },
+      {
+        rootMargin: "-30% 0px -45%",
+        threshold: [0.18, 0.36, 0.52],
+      },
+    );
+
+    navItems.forEach((item) => {
+      const section = document.getElementById(item.id);
+      if (section) observer.observe(section);
+    });
+
+    return () => observer.disconnect();
+  }, [isMobileViewport]);
 
   useEffect(() => {
     if (!isPhotoPinned || !portraitSourceRef.current || !floatingPortraitRef.current) return;
@@ -522,7 +605,7 @@ function App() {
             }}
             className="section shell section-shell cv-shell"
           >
-            <div className="cv-panel" data-reveal>
+            <div className="cv-section-layout" data-reveal>
               <div className="cv-copy">
                 <span className="section-kicker">{cv.kicker}</span>
                 <h2>{cv.title}</h2>
@@ -536,13 +619,10 @@ function App() {
                 </div>
               </div>
 
-              <div className="document-preview" aria-hidden="true">
-                <div className="doc-header">
-                  <span />
-                  <span />
-                </div>
+              <div className="cv-file-mark" aria-hidden="true">
+                <span className="cv-file-label">{cv.pageTitle}</span>
                 {Array.from({ length: 9 }).map((_, index) => (
-                  <span className="doc-line" key={index} />
+                  <span className="cv-file-line" key={index} />
                 ))}
               </div>
             </div>

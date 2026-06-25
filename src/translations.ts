@@ -60,7 +60,7 @@ export const translations = {
       startLabel: "Início",
       endLabel: "Fim",
       filters: {
-        main: "Main",
+        main: "Curricular",
         extracurricular: "Extracurricular",
       },
       typeLabels: {
@@ -71,7 +71,7 @@ export const translations = {
       },
       entries: [
         {
-          startDate: "2009",
+          startDate: "Setembro 2009",
           endDate: "Junho 2023",
           timelineType: "main",
           type: "Education",
@@ -307,7 +307,7 @@ export const translations = {
       startLabel: "Start",
       endLabel: "End",
       filters: {
-        main: "Main",
+        main: "Curricular",
         extracurricular: "Extracurricular",
       },
       typeLabels: {
@@ -318,7 +318,7 @@ export const translations = {
       },
       entries: [
         {
-          startDate: "2009",
+          startDate: "September 2009",
           endDate: "June 2023",
           timelineType: "main",
           type: "Education",
