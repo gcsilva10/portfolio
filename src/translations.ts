@@ -259,7 +259,10 @@ export const translations = {
       view: "Visualizar CV",
       download: "Baixar CV",
       close: "Voltar",
+      previousPage: "Página anterior",
+      nextPage: "Próxima página",
       pageTitle: "Curriculum Vitae",
+      pageCounter: "Página",
     },
     contactSection: {
       kicker: "Contacto",
@@ -506,7 +509,10 @@ export const translations = {
       view: "View CV",
       download: "Download CV",
       close: "Back",
+      previousPage: "Previous page",
+      nextPage: "Next page",
       pageTitle: "Curriculum Vitae",
+      pageCounter: "Page",
     },
     contactSection: {
       kicker: "Contact",

@@ -1,5 +1,5 @@
 import { type CSSProperties, useEffect, useMemo, useRef, useState } from "react";
-import { cvImagePath, cvPath } from "./content";
+import { cvImagePaths, cvPath } from "./content";
 import { ProjectItem } from "./components/ProjectItem";
 import { TimelineEntry } from "./components/TimelineEntry";
 import { type Language, type ProjectFilter, type TimelineFilter, translations } from "./translations";
@@ -69,6 +69,7 @@ function App() {
   const [timelineFilter, setTimelineFilter] = useState<TimelineFilter>("main");
   const [projectFilter, setProjectFilter] = useState<ProjectFilter>("pessoal");
   const [isCvViewerOpen, setIsCvViewerOpen] = useState(false);
+  const [activeCvPageIndex, setActiveCvPageIndex] = useState(0);
   const [isPhoneCopied, setIsPhoneCopied] = useState(false);
   const [pointer, setPointer] = useState({ x: -999, y: -999 });
   const [viewport, setViewport] = useState({ width: 0, height: 0 });
@@ -92,6 +93,9 @@ function App() {
     0,
     navItems.findIndex((item) => item.id === activeSection),
   );
+  const activeCvImagePath = cvImagePaths[activeCvPageIndex];
+  const hasPreviousCvPage = activeCvPageIndex > 0;
+  const hasNextCvPage = activeCvPageIndex < cvImagePaths.length - 1;
   const isPhotoPinned = activeSection !== "inicio";
   const depthGridCells = useMemo(() => {
     if (!viewport.width || !viewport.height) return [];
@@ -190,6 +194,16 @@ function App() {
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [isCvViewerOpen]);
+
+  useEffect(() => {
+    if (isCvViewerOpen) return;
+    setActiveCvPageIndex(0);
+  }, [isCvViewerOpen]);
+
+  const openCvViewer = () => {
+    setActiveCvPageIndex(0);
+    setIsCvViewerOpen(true);
+  };
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -419,7 +433,12 @@ function App() {
                 <span className="section-kicker">{cv.kicker}</span>
                 <h2>{cv.title}</h2>
                 <div className="cv-actions">
-                  <button className="button primary" type="button" onClick={() => setIsCvViewerOpen(true)}>
+                  <button
+                    className="button primary"
+                    type="button"
+                    onClick={openCvViewer}
+                    disabled={cvImagePaths.length === 0}
+                  >
                     {cv.view}
                   </button>
                   <a className="button ghost" href={cvPath} download>
@@ -483,6 +502,16 @@ function App() {
             <button className="button ghost" type="button" onClick={() => setIsCvViewerOpen(false)}>
               {cv.close}
             </button>
+            {hasPreviousCvPage ? (
+              <button className="button ghost" type="button" onClick={() => setActiveCvPageIndex((current) => current - 1)}>
+                {cv.previousPage}
+              </button>
+            ) : null}
+            {hasNextCvPage ? (
+              <button className="button ghost" type="button" onClick={() => setActiveCvPageIndex((current) => current + 1)}>
+                {cv.nextPage}
+              </button>
+            ) : null}
             <a className="button primary" href={cvPath} download>
               {cv.download}
             </a>
@@ -491,9 +520,17 @@ function App() {
           <div className="cv-image-frame">
             <div className="cv-image-header">
               <span className="section-kicker">{cv.pageTitle}</span>
-              <strong>{profile.name}</strong>
+              <strong>
+                {cv.pageCounter} {Math.min(activeCvPageIndex + 1, Math.max(cvImagePaths.length, 1))} / {Math.max(cvImagePaths.length, 1)}
+              </strong>
             </div>
-            <img className="cv-image" src={cvImagePath} alt={cv.pageTitle} />
+            {activeCvImagePath ? (
+              <img
+                className="cv-image"
+                src={activeCvImagePath}
+                alt={`${cv.pageTitle} ${activeCvPageIndex + 1}`}
+              />
+            ) : null}
           </div>
         </div>
       </section>
