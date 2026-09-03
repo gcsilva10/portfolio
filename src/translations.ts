@@ -8,7 +8,7 @@ export type TimelineEntryData = {
   startDate: string;
   endDate: string;
   timelineType: TimelineFilter;
-  type: "Education" | "Degree" | "Professional" | "Current";
+  type: "Education" | "Degree" | "Master" | "Professional" | "Current";
   title: string;
   description: string;
   imagePath: string;
@@ -66,6 +66,7 @@ export const translations = {
       typeLabels: {
         Education: "Educação",
         Degree: "Licenciatura",
+        Master: "Mestrado",
         Professional: "Profissional",
         Current: "Atual",
       },
@@ -89,6 +90,15 @@ export const translations = {
           imagePath: "/images/icons/dei.png",
         },
         {
+          startDate: "Setembro 2026",
+          endDate: "Presente",
+          timelineType: "main",
+          type: "Master",
+          title: "Departamento de Engenharia Informática da FCTUC",
+          description: "Mestrado em Engenharia Informática - Ramo de Engenharia de Software.",
+          imagePath: "/images/icons/dei.png",
+        },
+        {
           startDate: "Julho 2025",
           endDate: "Agosto 2025",
           timelineType: "main",
@@ -99,21 +109,21 @@ export const translations = {
         },
         {
           startDate: "Outubro 2025",
-          endDate: "Julho 2026",
+          endDate: "Presente",
           timelineType: "main",
           type: "Professional",
-          title: "Núcleo de Estudantes de Informática",
+          title: "JeKnowledge",
           description: "Tech Developer.",
-          imagePath: "/images/icons/nei.png",
+          imagePath: "/images/icons/jek.png",
         },
         {
           startDate: "Outubro 2025",
           endDate: "Presente",
           timelineType: "main",
-          type: "Current",
-          title: "JeKnowledge",
+          type: "Professional",
+          title: "Núcleo de Estudantes de Informática",
           description: "Tech Developer.",
-          imagePath: "/images/icons/jek.png",
+          imagePath: "/images/icons/nei.png",
         },
         {
           startDate: "Agosto 2015",
@@ -316,6 +326,7 @@ export const translations = {
       typeLabels: {
         Education: "Education",
         Degree: "Degree",
+        Master: "Master's",
         Professional: "Professional",
         Current: "Current",
       },
@@ -339,6 +350,15 @@ export const translations = {
           imagePath: "/images/icons/dei.png",
         },
         {
+          startDate: "September 2026",
+          endDate: "Present",
+          timelineType: "main",
+          type: "Master",
+          title: "Department of Informatics Engineering at FCTUC",
+          description: "Master's degree in Informatics Engineering - Software Engineering specialization.",
+          imagePath: "/images/icons/dei.png",
+        },
+        {
           startDate: "July 2025",
           endDate: "August 2025",
           timelineType: "main",
@@ -349,21 +369,21 @@ export const translations = {
         },
         {
           startDate: "October 2025",
-          endDate: "July 2026",
+          endDate: "Present",
           timelineType: "main",
           type: "Professional",
-          title: "Informatics Students' Association",
+          title: "JeKnowledge",
           description: "Tech Developer.",
-          imagePath: "/images/icons/nei.png",
+          imagePath: "/images/icons/jek.png",
         },
         {
           startDate: "October 2025",
           endDate: "Present",
           timelineType: "main",
-          type: "Current",
-          title: "JeKnowledge",
+          type: "Professional",
+          title: "Informatics Students' Association",
           description: "Tech Developer.",
-          imagePath: "/images/icons/jek.png",
+          imagePath: "/images/icons/nei.png",
         },
         {
           startDate: "August 2015",
