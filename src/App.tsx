@@ -125,15 +125,15 @@ function App() {
           "--grid-depth": `${Math.round(easedLift * 22)}px`,
           "--grid-rotate-x": `${(-distanceY / depthGridRadius) * easedLift * 18}deg`,
           "--grid-rotate-y": `${(distanceX / depthGridRadius) * easedLift * 18}deg`,
-          "--grid-border": `${easedLift * 44}%`,
-          "--grid-paper": `${easedLift * 28}%`,
-          "--grid-tint": `${easedLift * 18}%`,
+          "--grid-border": `${12 + easedLift * 42}%`,
+          "--grid-paper": `${5 + easedLift * 26}%`,
+          "--grid-tint": `${3 + easedLift * 18}%`,
           "--grid-shadow-x": `${easedLift * 10}px`,
           "--grid-shadow-y": `${easedLift * 14}px`,
           "--grid-shadow-blur": `${easedLift * 30}px`,
           "--grid-inset-dark": `${easedLift * 16}px`,
           "--grid-inset-light": `${easedLift * 14}px`,
-          "--grid-opacity": `${easedLift * 0.92}`,
+          "--grid-opacity": `${0.16 + easedLift * 0.76}`,
           "--grid-scale": `${1 + easedLift * 0.08}`,
         } as CSSProperties,
       };
@@ -206,27 +206,41 @@ function App() {
   };
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visibleEntry = entries
-          .filter((entry) => entry.isIntersecting)
-          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+    let animationFrameId = 0;
 
-        if (!visibleEntry?.target.id) return;
-        setActiveSection(visibleEntry.target.id as SectionId);
-      },
-      {
-        rootMargin: "-34% 0px -44%",
-        threshold: [0.16, 0.32, 0.5],
-      },
-    );
+    const updateActiveSection = () => {
+      animationFrameId = 0;
+      const readingLine = window.innerHeight * 0.42;
+      let nextSection: SectionId = navItems[0].id;
 
-    navItems.forEach((item) => {
-      const section = document.getElementById(item.id);
-      if (section) observer.observe(section);
-    });
+      for (const item of navItems) {
+        const section = document.getElementById(item.id);
+        if (!section) continue;
 
-    return () => observer.disconnect();
+        const bounds = section.getBoundingClientRect();
+        if (bounds.top <= readingLine) nextSection = item.id;
+        if (bounds.top <= readingLine && bounds.bottom > readingLine) break;
+      }
+
+      setActiveSection((currentSection) =>
+        currentSection === nextSection ? currentSection : nextSection,
+      );
+    };
+
+    const scheduleSectionUpdate = () => {
+      if (animationFrameId) return;
+      animationFrameId = window.requestAnimationFrame(updateActiveSection);
+    };
+
+    updateActiveSection();
+    window.addEventListener("scroll", scheduleSectionUpdate, { passive: true });
+    window.addEventListener("resize", scheduleSectionUpdate);
+
+    return () => {
+      window.removeEventListener("scroll", scheduleSectionUpdate);
+      window.removeEventListener("resize", scheduleSectionUpdate);
+      if (animationFrameId) window.cancelAnimationFrame(animationFrameId);
+    };
   }, []);
 
   return (
