@@ -40,6 +40,7 @@ export const translations = {
       phone: "+351 915 227 577",
       githubUrl: "https://github.com/gcsilva10",
       linkedinUrl: "https://www.linkedin.com/in/gon%C3%A7alocoimbrasilva/",
+      birthDate: "2005-11-24",
       headline: "Gonçalo Silva",
       intro: "",
       photoAlt: "Fotografia de Gonçalo Silva",
@@ -50,8 +51,11 @@ export const translations = {
     },
     hero: {
       eyebrow: "Portfolio pessoal interativo",
+      ageLabel: "Idade",
+      ageUnit: "anos",
       exploreTimeline: "Explorar percurso",
       viewProjects: "Ver projetos",
+      viewContact: "Contactos",
       identityLabel: "Identidade visual",
     },
     timelineSection: {
@@ -179,6 +183,12 @@ export const translations = {
       websiteButton: "Ver website",
       projects: [
         {
+          title: "Website de Portfólio",
+          type: "pessoal",
+          description: "Portfólio pessoal bilingue e interativo para apresentar o meu percurso, projetos, CV e contactos.",
+          frameworks: ["React", "TypeScript", "Vite"],
+        },
+        {
           title: "Dashboard Pessoal",
           type: "pessoal",
           description: "Website pessoal para organizar horários, tarefas, finanças e mais.",
@@ -300,6 +310,7 @@ export const translations = {
       phone: "+351 915 227 577",
       githubUrl: "https://github.com/gcsilva10",
       linkedinUrl: "https://www.linkedin.com/in/gon%C3%A7alocoimbrasilva/",
+      birthDate: "2005-11-24",
       headline: "Gonçalo Silva",
       intro: "",
       photoAlt: "Photo of Gonçalo Silva",
@@ -310,8 +321,11 @@ export const translations = {
     },
     hero: {
       eyebrow: "Interactive personal portfolio",
+      ageLabel: "Age",
+      ageUnit: "years old",
       exploreTimeline: "Explore timeline",
       viewProjects: "View projects",
+      viewContact: "Contacts",
       identityLabel: "Visual identity",
     },
     timelineSection: {
@@ -438,6 +452,12 @@ export const translations = {
       },
       websiteButton: "View website",
       projects: [
+        {
+          title: "Portfolio Website",
+          type: "pessoal",
+          description: "Bilingual, interactive personal portfolio showcasing my background, projects, CV and contact details.",
+          frameworks: ["React", "TypeScript", "Vite"],
+        },
         {
           title: "Personal Dashboard",
           type: "pessoal",

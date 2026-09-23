@@ -58,10 +58,20 @@ function getTimelineDateValue(date: string) {
   return year * 12 + month;
 }
 
+function getAge(birthDate: string, today = new Date()) {
+  const [birthYear, birthMonth, birthDay] = birthDate.split("-").map(Number);
+  const birthdayHasPassed =
+    today.getMonth() + 1 > birthMonth ||
+    (today.getMonth() + 1 === birthMonth && today.getDate() >= birthDay);
+
+  return today.getFullYear() - birthYear - (birthdayHasPassed ? 0 : 1);
+}
+
 function App() {
   const [language, setLanguage] = useState<Language>("pt");
   const copy = translations[language];
   const profile = copy.profile;
+  const age = getAge(profile.birthDate);
   const timeline = copy.timelineSection.entries;
   const projects = copy.projectSection.projects;
   const cv = copy.cvSection;
@@ -314,7 +324,7 @@ function App() {
           <div className="hero-copy" data-reveal>
             <span className="eyebrow">{copy.hero.eyebrow}</span>
             <h1>{profile.headline}</h1>
-            <p>{profile.intro}</p>
+            {profile.intro ? <p>{profile.intro}</p> : null}
 
             <div className="hero-actions">
               <button className="button primary" type="button" onClick={() => moveToSection(1)}>
@@ -322,6 +332,9 @@ function App() {
               </button>
               <button className="button ghost" type="button" onClick={() => moveToSection(2)}>
                 {copy.hero.viewProjects}
+              </button>
+              <button className="button ghost" type="button" onClick={() => moveToSection(4)}>
+                {copy.hero.viewContact}
               </button>
             </div>
           </div>
@@ -342,6 +355,10 @@ function App() {
             <div className="signal-card signal-two">
               <strong>{profile.locationTitle}</strong>
               <span>{profile.locationText}</span>
+            </div>
+            <div className="signal-card signal-three">
+              <strong>{copy.hero.ageLabel}</strong>
+              <span>{age} {copy.hero.ageUnit}</span>
             </div>
           </aside>
           </div>
