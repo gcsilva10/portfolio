@@ -187,9 +187,9 @@ export const translations = {
         {
           title: "Website de Horários do MetroBus",
           type: "pessoal",
-          description: "Website com cerca de 200 utilizadores por semana, com horários e rotas de autocarros em tempo real.",
+          description: "Website com cerca de 800 utilizadores por dia, com horários e rotas de autocarros em tempo real.",
           frameworks: ["Next.js", "Maps", "API"],
-          websiteUrl: "https://metrobus-horarios.vercel.app",
+          websiteUrl: "https://planearviagem.metromondego.pt",
         },
         {
           title: "Sistema de Gestão de Férias",
@@ -447,9 +447,9 @@ export const translations = {
         {
           title: "MetroBus Schedule",
           type: "pessoal",
-          description: "Website with around 200 users per week, providing real-time bus schedules and route information.",
+          description: "Website with around 800 users per day, providing real-time bus schedules and route information.",
           frameworks: ["Next.js", "Maps", "API"],
-          websiteUrl: "https://metrobus-horarios.vercel.app",
+          websiteUrl: "https://planearviagem.metromondego.pt",
         },
         {
           title: "Vacation Management System",
