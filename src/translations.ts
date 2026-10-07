@@ -122,7 +122,7 @@ export const translations = {
         },
         {
           startDate: "Outubro 2025",
-          endDate: "Presente",
+          endDate: "Setembro 2026",
           timelineType: "main",
           type: "Professional",
           title: "Núcleo de Estudantes de Informática",
@@ -197,7 +197,7 @@ export const translations = {
         {
           title: "Website de Horários do MetroBus",
           type: "pessoal",
-          description: "Website com cerca de 800 utilizadores por dia, com horários e rotas de autocarros em tempo real.",
+          description: "Website com cerca de 3000 utilizadores por dia, com horários e rotas de autocarros em tempo real.",
           frameworks: ["Next.js", "Maps", "API"],
           websiteUrl: "https://planearviagem.metromondego.pt",
         },
@@ -392,7 +392,7 @@ export const translations = {
         },
         {
           startDate: "October 2025",
-          endDate: "Present",
+          endDate: "September 2026",
           timelineType: "main",
           type: "Professional",
           title: "Informatics Students' Association",
@@ -467,7 +467,7 @@ export const translations = {
         {
           title: "MetroBus Schedule",
           type: "pessoal",
-          description: "Website with around 800 users per day, providing real-time bus schedules and route information.",
+          description: "Website with around 3,000 users per day, providing real-time bus schedules and route information.",
           frameworks: ["Next.js", "Maps", "API"],
           websiteUrl: "https://planearviagem.metromondego.pt",
         },

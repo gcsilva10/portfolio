@@ -88,10 +88,10 @@ function App() {
   const filteredTimeline = useMemo(
     () =>
       [...timeline.filter((entry) => entry.timelineType === timelineFilter)].sort((left, right) => {
-          const endDifference = getTimelineDateValue(right.endDate) - getTimelineDateValue(left.endDate);
-          if (endDifference !== 0) return endDifference;
+          const startDifference = getTimelineDateValue(right.startDate) - getTimelineDateValue(left.startDate);
+          if (startDifference !== 0) return startDifference;
 
-          return getTimelineDateValue(right.startDate) - getTimelineDateValue(left.startDate);
+          return getTimelineDateValue(right.endDate) - getTimelineDateValue(left.endDate);
         }),
     [timelineFilter, timeline],
   );
