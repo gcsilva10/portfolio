@@ -79,8 +79,10 @@ export function useMotion<T extends string>(
 
       const hero = sectionElements[0]?.getBoundingClientRect();
       const heroProgress = hero && !reduceMotion.matches ? Math.min(1, Math.max(0, -hero.top / hero.height)) : 0;
+      const backgroundProgress = hero && !reduceMotion.matches ? Math.min(1, Math.max(0, window.scrollY / hero.height)) : 0;
       page.style.setProperty("--hero-shift", `${heroProgress * 100}px`);
       page.style.setProperty("--portrait-angle", `${4 - heroProgress * 12}deg`);
+      page.style.setProperty("--hero-background-progress", String(backgroundProgress));
 
       const journey = sectionElements[2]?.getBoundingClientRect();
       if (journey) {

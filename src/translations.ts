@@ -27,6 +27,7 @@ export type ProjectItemData = {
 export const translations = {
   pt: {
     languageLabel: "Idioma",
+    terminal: { role: "Desenvolvimento de software" },
     nav: {
       inicio: "Início",
       percurso: "Percurso",
@@ -50,7 +51,6 @@ export const translations = {
       locationText: "Portugal",
     },
     hero: {
-      eyebrow: "Portfolio pessoal interativo",
       ageLabel: "Idade",
       ageUnit: "anos",
       exploreTimeline: "Explorar percurso",
@@ -297,6 +297,7 @@ export const translations = {
   },
   en: {
     languageLabel: "Language",
+    terminal: { role: "Software development" },
     nav: {
       inicio: "Home",
       percurso: "Timeline",
@@ -320,7 +321,6 @@ export const translations = {
       locationText: "Portugal",
     },
     hero: {
-      eyebrow: "Interactive personal portfolio",
       ageLabel: "Age",
       ageUnit: "years old",
       exploreTimeline: "Explore timeline",

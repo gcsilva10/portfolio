@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { cvImagePaths, cvPath } from "./content";
 import { ProjectItem } from "./components/ProjectItem";
+import { TerminalIntro } from "./components/TerminalIntro";
 import { TimelineEntry } from "./components/TimelineEntry";
 import { type Language, type ProjectFilter, type TimelineFilter, translations } from "./translations";
 import { useMotion } from "./useMotion";
@@ -59,6 +60,7 @@ function getAge(birthDate: string, today = new Date()) {
 }
 
 function App() {
+  const [showIntro, setShowIntro] = useState(() => !window.location.hash || window.location.hash === "#inicio");
   const [language, setLanguage] = useState<Language>("pt");
   const [projectFilter, setProjectFilter] = useState<ProjectFilter>("pessoal");
   const [timelineFilter, setTimelineFilter] = useState<TimelineFilter>("main");
@@ -68,6 +70,7 @@ function App() {
   const canvas = useRef<HTMLCanvasElement>(null);
   const cursor = useRef<HTMLDivElement>(null);
   const page = useRef<HTMLDivElement>(null);
+  const heroHeading = useRef<HTMLHeadingElement>(null);
   const activeSection = useMotion(page, canvas, cursor, sections);
 
   const pt = language === "pt";
@@ -99,7 +102,13 @@ function App() {
     }
   }
 
-  return (
+  return (<>
+    {showIntro && <TerminalIntro name={profile.name} role={copy.terminal.role}
+      location={`${profile.locationTitle}, ${profile.locationText}`}
+      onClose={() => {
+        setShowIntro(false);
+        heroHeading.current?.focus({ preventScroll: true });
+      }} />}
     <div className="site" ref={page}>
       <div className="cursor" ref={cursor} aria-hidden="true"><span /></div>
       <a className="skip-link" href="#main">{pt ? "Saltar para o conteúdo" : "Skip to content"}</a>
@@ -123,23 +132,21 @@ function App() {
       </header>
 
       <main id="main">
-        <section id="inicio" className="hero wrap">
-          <div className="hero-meta mono">
-            <span><i aria-hidden="true" />{pt ? "Portefólio pessoal" : "Personal portfolio"}</span>
-            <span>{profile.locationTitle}, {profile.locationText}</span>
-          </div>
-          <div className="hero-layout">
+        <section id="inicio" className="hero">
+          <div className="hero-layout wrap">
             <div className="hero-text">
-              <h1 aria-label={profile.name}><span>Gonçalo</span><span>Silva<em>.</em></span></h1>
-              <p>{profile.degreeText}<br />{pt ? "Desenvolvimento de software" : "Software development"}</p>
+              <h1 ref={heroHeading} tabIndex={-1} aria-label={profile.name}><span>Gonçalo</span><span>Silva<em>.</em></span></h1>
+              <p>{profile.degreeText}<br />{copy.terminal.role}</p>
             </div>
             <figure className="portrait">
               <div className="portrait-frame">
                 <img src="/images/fotografia/fotografia.jpg" alt={profile.photoAlt} fetchPriority="high" />
-                <span className="portrait-cross cross-top" aria-hidden="true">+</span>
-                <span className="portrait-cross cross-bottom" aria-hidden="true">+</span>
+                <span className="portrait-cross" aria-hidden="true">+</span>
               </div>
-              <figcaption className="mono"><span>{profile.locationTitle}, PT</span><span>{getAge(profile.birthDate)} {copy.hero.ageUnit}</span></figcaption>
+              <figcaption className="mono">
+                <span>{profile.locationTitle}, PT</span>
+                <span>{getAge(profile.birthDate)} {copy.hero.ageUnit}</span>
+              </figcaption>
             </figure>
             <a className="hero-jump" href="#projetos"><span aria-hidden="true">↓</span>{copy.hero.viewProjects}</a>
           </div>
@@ -247,6 +254,7 @@ function App() {
         </footer>
       </dialog>
     </div>
+  </>
   );
 }
 
