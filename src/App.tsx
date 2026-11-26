@@ -1,21 +1,11 @@
-import { type CSSProperties, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { cvImagePaths, cvPath } from "./content";
 import { ProjectItem } from "./components/ProjectItem";
 import { TimelineEntry } from "./components/TimelineEntry";
 import { type Language, type ProjectFilter, type TimelineFilter, translations } from "./translations";
 
-type SectionId = "inicio" | "percurso" | "projetos" | "cv" | "contacto";
+const sections = ["inicio", "projetos", "percurso", "cv", "contacto"] as const;
 
-const navItems = [
-  { id: "inicio" },
-  { id: "percurso" },
-  { id: "projetos" },
-  { id: "cv" },
-  { id: "contacto" },
-] satisfies Array<{ id: SectionId }>;
-
-const depthGridCellSize = 48;
-const depthGridRadius = 190;
 const timelineMonthIndex: Record<string, number> = {
   janeiro: 0,
   january: 0,
@@ -69,518 +59,178 @@ function getAge(birthDate: string, today = new Date()) {
 
 function App() {
   const [language, setLanguage] = useState<Language>("pt");
+  const [projectFilter, setProjectFilter] = useState<ProjectFilter>("pessoal");
+  const [timelineFilter, setTimelineFilter] = useState<TimelineFilter>("main");
+  const [cvPage, setCvPage] = useState(0);
+  const [phoneStatus, setPhoneStatus] = useState<"idle" | "copied" | "failed">("idle");
+  const dialog = useRef<HTMLDialogElement>(null);
+  const pt = language === "pt";
   const copy = translations[language];
   const profile = copy.profile;
-  const age = getAge(profile.birthDate);
-  const timeline = copy.timelineSection.entries;
-  const projects = copy.projectSection.projects;
   const cv = copy.cvSection;
-  const [activeSection, setActiveSection] = useState<SectionId>("inicio");
-  const [timelineFilter, setTimelineFilter] = useState<TimelineFilter>("main");
-  const [projectFilter, setProjectFilter] = useState<ProjectFilter>("pessoal");
-  const [isCvViewerOpen, setIsCvViewerOpen] = useState(false);
-  const [activeCvPageIndex, setActiveCvPageIndex] = useState(0);
-  const [isPhoneCopied, setIsPhoneCopied] = useState(false);
-  const [pointer, setPointer] = useState({ x: -999, y: -999 });
-  const [viewport, setViewport] = useState({ width: 0, height: 0 });
-  const sectionShellRefs = useRef<Record<string, HTMLDivElement | null>>({});
-
-  const filteredTimeline = useMemo(
-    () =>
-      [...timeline.filter((entry) => entry.timelineType === timelineFilter)].sort((left, right) => {
-          const startDifference = getTimelineDateValue(right.startDate) - getTimelineDateValue(left.startDate);
-          if (startDifference !== 0) return startDifference;
-
-          return getTimelineDateValue(right.endDate) - getTimelineDateValue(left.endDate);
-        }),
-    [timelineFilter, timeline],
-  );
-  const filteredProjects = useMemo(
-    () => projects.filter((project) => project.type === projectFilter),
-    [projectFilter, projects],
-  );
-  const activeSectionIndex = Math.max(
-    0,
-    navItems.findIndex((item) => item.id === activeSection),
-  );
-  const activeCvImagePath = cvImagePaths[activeCvPageIndex];
-  const hasPreviousCvPage = activeCvPageIndex > 0;
-  const hasNextCvPage = activeCvPageIndex < cvImagePaths.length - 1;
-  const isPhotoPinned = activeSection !== "inicio";
-  const depthGridCells = useMemo(() => {
-    if (!viewport.width || !viewport.height) return [];
-
-    const columns = Math.ceil(viewport.width / depthGridCellSize) + 1;
-    const rows = Math.ceil(viewport.height / depthGridCellSize) + 1;
-
-    return Array.from({ length: columns * rows }, (_, index) => {
-      const column = index % columns;
-      const row = Math.floor(index / columns);
-      const left = column * depthGridCellSize;
-      const top = row * depthGridCellSize;
-      const centerX = left + depthGridCellSize / 2;
-      const centerY = top + depthGridCellSize / 2;
-      const distanceX = pointer.x - centerX;
-      const distanceY = pointer.y - centerY;
-      const distance = Math.hypot(distanceX, distanceY);
-      const lift = Math.max(0, 1 - distance / depthGridRadius);
-      const easedLift = lift * lift;
-
-      return {
-        id: `${column}-${row}`,
-        style: {
-          left,
-          top,
-          "--grid-lift": `${easedLift}`,
-          "--grid-depth": `${Math.round(easedLift * 22)}px`,
-          "--grid-rotate-x": `${(-distanceY / depthGridRadius) * easedLift * 18}deg`,
-          "--grid-rotate-y": `${(distanceX / depthGridRadius) * easedLift * 18}deg`,
-          "--grid-border": `${12 + easedLift * 42}%`,
-          "--grid-paper": `${5 + easedLift * 26}%`,
-          "--grid-tint": `${3 + easedLift * 18}%`,
-          "--grid-shadow-x": `${easedLift * 10}px`,
-          "--grid-shadow-y": `${easedLift * 14}px`,
-          "--grid-shadow-blur": `${easedLift * 30}px`,
-          "--grid-inset-dark": `${easedLift * 16}px`,
-          "--grid-inset-light": `${easedLift * 14}px`,
-          "--grid-opacity": `${0.16 + easedLift * 0.76}`,
-          "--grid-scale": `${1 + easedLift * 0.08}`,
-        } as CSSProperties,
-      };
-    });
-  }, [pointer.x, pointer.y, viewport.height, viewport.width]);
+  const projects = copy.projectSection.projects.filter((project) => project.type === projectFilter);
+  const timeline = copy.timelineSection.entries
+    .filter((entry) => entry.timelineType === timelineFilter)
+    .sort((a, b) => (getTimelineDateValue(b.startDate) - getTimelineDateValue(a.startDate)) ||
+      (getTimelineDateValue(b.endDate) - getTimelineDateValue(a.endDate)));
 
   useEffect(() => {
     document.documentElement.lang = language;
   }, [language]);
 
   useEffect(() => {
-    if (!isPhoneCopied) return;
-    const timeoutId = window.setTimeout(() => setIsPhoneCopied(false), 1800);
-    return () => window.clearTimeout(timeoutId);
-  }, [isPhoneCopied]);
+    if (phoneStatus === "idle") return;
+    const timeout = window.setTimeout(() => setPhoneStatus("idle"), 2400);
+    return () => window.clearTimeout(timeout);
+  }, [phoneStatus]);
 
-  const moveToSection = (nextIndex: number) => {
-    if (nextIndex < 0 || nextIndex >= navItems.length || nextIndex === activeSectionIndex) return;
-
-    const nextSection = navItems[nextIndex].id;
-    setActiveSection(nextSection);
-    document.getElementById(nextSection)?.scrollIntoView({ behavior: "smooth", block: "start" });
-  };
-
-  const handleCopyPhone = async () => {
+  async function copyPhone() {
     try {
       await navigator.clipboard.writeText(profile.phone);
-      setIsPhoneCopied(true);
+      setPhoneStatus("copied");
     } catch {
-      setIsPhoneCopied(false);
+      setPhoneStatus("failed");
     }
-  };
-
-  useEffect(() => {
-    const updateViewport = () => {
-      setViewport({ width: window.innerWidth, height: window.innerHeight });
-    };
-
-    updateViewport();
-    window.addEventListener("resize", updateViewport);
-    return () => window.removeEventListener("resize", updateViewport);
-  }, []);
-
-  useEffect(() => {
-    const onPointerMove = (event: PointerEvent) => {
-      setPointer({ x: event.clientX, y: event.clientY });
-    };
-
-    window.addEventListener("pointermove", onPointerMove);
-    return () => window.removeEventListener("pointermove", onPointerMove);
-  }, []);
-
-  useEffect(() => {
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (isCvViewerOpen && event.key === "Escape") setIsCvViewerOpen(false);
-    };
-
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, [isCvViewerOpen]);
-
-  useEffect(() => {
-    if (isCvViewerOpen) return;
-    setActiveCvPageIndex(0);
-  }, [isCvViewerOpen]);
-
-  const openCvViewer = () => {
-    setActiveCvPageIndex(0);
-    setIsCvViewerOpen(true);
-  };
-
-  useEffect(() => {
-    let animationFrameId = 0;
-
-    const updateActiveSection = () => {
-      animationFrameId = 0;
-      const readingLine = window.innerHeight * 0.42;
-      let nextSection: SectionId = navItems[0].id;
-
-      for (const item of navItems) {
-        const section = document.getElementById(item.id);
-        if (!section) continue;
-
-        const bounds = section.getBoundingClientRect();
-        if (bounds.top <= readingLine) nextSection = item.id;
-        if (bounds.top <= readingLine && bounds.bottom > readingLine) break;
-      }
-
-      setActiveSection((currentSection) =>
-        currentSection === nextSection ? currentSection : nextSection,
-      );
-    };
-
-    const scheduleSectionUpdate = () => {
-      if (animationFrameId) return;
-      animationFrameId = window.requestAnimationFrame(updateActiveSection);
-    };
-
-    updateActiveSection();
-    window.addEventListener("scroll", scheduleSectionUpdate, { passive: true });
-    window.addEventListener("resize", scheduleSectionUpdate);
-
-    return () => {
-      window.removeEventListener("scroll", scheduleSectionUpdate);
-      window.removeEventListener("resize", scheduleSectionUpdate);
-      if (animationFrameId) window.cancelAnimationFrame(animationFrameId);
-    };
-  }, []);
+  }
 
   return (
-    <>
-      <div
-        className="depth-grid"
-        aria-hidden="true"
-        style={
-          {
-            "--cursor-x": `${pointer.x}px`,
-            "--cursor-y": `${pointer.y}px`,
-          } as CSSProperties
-        }
-      >
-        {depthGridCells.map((cell) => (
-          <span className="depth-grid-cell" key={cell.id} style={cell.style} />
-        ))}
-      </div>
-
-      <div className="language-switcher" aria-label={copy.languageLabel}>
-        {(["pt", "en"] as const).map((item) => (
-          <button
-            key={item}
-            className={language === item ? "is-active" : ""}
-            type="button"
-            onClick={() => setLanguage(item)}
-          >
-            {item.toUpperCase()}
-          </button>
-        ))}
-      </div>
-
-      <aside className="section-rail" aria-label={copy.nav[activeSection]}>
-        <div className="rail-track" style={{ "--rail-active": activeSectionIndex } as CSSProperties}>
-          <span className="rail-progress" />
-          {navItems.map((item, index) => (
-            <button
-              aria-current={activeSection === item.id ? "page" : undefined}
-              aria-label={copy.nav[item.id]}
-              className={`rail-item ${activeSection === item.id ? "is-active" : ""}`}
-              key={item.id}
-              type="button"
-              onClick={() => moveToSection(index)}
-            >
-              <span className="rail-dot" />
-              <span className="rail-label">{copy.nav[item.id]}</span>
+    <div className="site">
+      <a className="skip-link" href="#main">{pt ? "Saltar para o conteúdo" : "Skip to content"}</a>
+      <header className="site-header">
+        <a className="wordmark" href="#inicio" aria-label={profile.name}>gs<span>.</span></a>
+        <nav aria-label={pt ? "Navegação principal" : "Main navigation"}>
+          {sections.slice(1).map((id) => (
+            <a key={id} href={`#${id}`}>
+              {copy.nav[id]}
+            </a>
+          ))}
+        </nav>
+        <div className="languages" role="group" aria-label={copy.languageLabel}>
+          {(["pt", "en"] as const).map((item) => (
+            <button key={item} type="button" lang={item} onClick={() => setLanguage(item)} aria-pressed={language === item}>
+              {item.toUpperCase()}
             </button>
           ))}
         </div>
-      </aside>
+      </header>
 
-      <div className={`floating-portrait ${isPhotoPinned ? "is-visible" : ""}`} aria-hidden={!isPhotoPinned}>
-        <img
-          className="floating-portrait-photo"
-          src="/images/fotografia/fotografia.jpg"
-          alt=""
-        />
-      </div>
-
-      <main>
-        <section
-          id="inicio"
-          className={`screen-section ${activeSection === "inicio" ? "is-active" : activeSectionIndex > 0 ? "is-before" : "is-after"}`}
-        >
-          <div
-            ref={(node) => {
-              sectionShellRefs.current.inicio = node;
-            }}
-            className="hero shell section-shell"
-          >
-          <div className="hero-copy" data-reveal>
-            <span className="eyebrow">{copy.hero.eyebrow}</span>
-            <h1>{profile.headline}</h1>
-            {profile.intro ? <p>{profile.intro}</p> : null}
-
-            <div className="hero-actions">
-              <button className="button primary" type="button" onClick={() => moveToSection(1)}>
-                {copy.hero.exploreTimeline}
-              </button>
-              <button className="button ghost" type="button" onClick={() => moveToSection(2)}>
-                {copy.hero.viewProjects}
-              </button>
-              <button className="button ghost" type="button" onClick={() => moveToSection(4)}>
-                {copy.hero.viewContact}
-              </button>
-            </div>
+      <main id="main">
+        <section id="inicio" className="hero wrap">
+          <div className="hero-meta mono">
+            <span><i aria-hidden="true" />{pt ? "Portefólio pessoal" : "Personal portfolio"}</span>
+            <span>{profile.locationTitle}, {profile.locationText}</span>
           </div>
-
-          <aside className="identity-panel" aria-label={copy.hero.identityLabel} data-reveal>
-            <div className="portrait-card">
-              <div className="portrait-grid" />
-              <img
-                className="portrait-photo"
-                src="/images/fotografia/fotografia.jpg"
-                alt={profile.photoAlt}
-              />
+          <div className="hero-layout">
+            <div className="hero-text">
+              <h1 aria-label={profile.name}><span>Gonçalo</span><span>Silva<em>.</em></span></h1>
+              <p>{profile.degreeText}<br />{pt ? "Desenvolvimento de software" : "Software development"}</p>
             </div>
-            <div className="signal-card signal-one">
-              <strong>{profile.degreeTitle}</strong>
-              <span>{profile.degreeText}</span>
-            </div>
-            <div className="signal-card signal-two">
-              <strong>{profile.locationTitle}</strong>
-              <span>{profile.locationText}</span>
-            </div>
-            <div className="signal-card signal-three">
-              <strong>{copy.hero.ageLabel}</strong>
-              <span>{age} {copy.hero.ageUnit}</span>
-            </div>
-          </aside>
+            <figure className="portrait">
+              <div className="portrait-frame">
+                <img src="/images/fotografia/fotografia.jpg" alt={profile.photoAlt} fetchPriority="high" />
+                <span className="portrait-cross cross-top" aria-hidden="true">+</span>
+                <span className="portrait-cross cross-bottom" aria-hidden="true">+</span>
+              </div>
+              <figcaption className="mono"><span>{profile.locationTitle}, PT</span><span>{getAge(profile.birthDate)} {copy.hero.ageUnit}</span></figcaption>
+            </figure>
+            <a className="hero-jump" href="#projetos"><span aria-hidden="true">↓</span>{copy.hero.viewProjects}</a>
           </div>
         </section>
 
-        <section
-          id="percurso"
-          className={`screen-section ${activeSection === "percurso" ? "is-active" : activeSectionIndex > 1 ? "is-before" : "is-after"}`}
-        >
-          <div
-            ref={(node) => {
-              sectionShellRefs.current.percurso = node;
-            }}
-            className="section shell section-shell"
-          >
-            <SectionHead
-              kicker={copy.timelineSection.kicker}
-              title={copy.timelineSection.title}
-            />
+        <section id="projetos" className="work">
+          <div className="wrap">
+            <div className="section-top" data-reveal>
+              <h2>{copy.projectSection.title}</h2>
+              <div className="filters" role="group" aria-label={copy.nav.projetos}>
+                {(Object.keys(copy.projectSection.filters) as ProjectFilter[]).map((filter) => (
+                  <button key={filter} type="button" aria-pressed={projectFilter === filter} onClick={() => setProjectFilter(filter)}>
+                    {copy.projectSection.filters[filter]}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="project-grid" key={projectFilter}>
+              {projects.map((project, index) => (
+                <ProjectItem key={project.title} project={project} index={index} websiteButtonLabel={copy.projectSection.websiteButton} />
+              ))}
+            </div>
+          </div>
+        </section>
 
-            <div className="timeline-toolbar" data-reveal>
+        <section id="percurso" className="journey wrap">
+          <div className="journey-heading" data-reveal>
+            <span className="mono">{copy.timelineSection.kicker}</span>
+            <h2>{copy.timelineSection.title}</h2>
+            <div className="filters" role="group" aria-label={copy.nav.percurso}>
               {(Object.keys(copy.timelineSection.filters) as TimelineFilter[]).map((filter) => (
-                <button
-                  key={filter}
-                  className={`filter-button ${timelineFilter === filter ? "is-active" : ""}`}
-                  type="button"
-                  onClick={() => setTimelineFilter(filter)}
-                >
+                <button key={filter} type="button" aria-pressed={timelineFilter === filter} onClick={() => setTimelineFilter(filter)}>
                   {copy.timelineSection.filters[filter]}
                 </button>
               ))}
             </div>
+          </div>
+          <div className="timeline" key={timelineFilter}>
+            {timeline.map((entry) => (
+              <TimelineEntry key={`${entry.startDate}-${entry.title}`} entry={entry} typeLabel={copy.timelineSection.typeLabels[entry.type]} />
+            ))}
+          </div>
+        </section>
 
-            <div className="timeline">
-              {filteredTimeline.map((entry, index) => (
-                <TimelineEntry
-                  key={`${entry.startDate}-${entry.title}`}
-                  entry={entry}
-                  index={index}
-                  startLabel={copy.timelineSection.startLabel}
-                  endLabel={copy.timelineSection.endLabel}
-                  typeLabel={copy.timelineSection.typeLabels[entry.type]}
-                />
-              ))}
+        <section id="cv" className="cv">
+          <div className="wrap cv-layout">
+            <div data-reveal>
+              <h2>{cv.kicker}</h2>
+              <div className="cv-actions">
+                <button className="pill solid" type="button" disabled={!cvImagePaths.length} onClick={() => {
+                  setCvPage(0);
+                  dialog.current?.showModal();
+                }}>{cv.view} <span aria-hidden="true">↗</span></button>
+                <a className="pill" href={cvPath} download>{cv.download} <span aria-hidden="true">↓</span></a>
+              </div>
+            </div>
+            <div className="paper-stack" aria-hidden="true">
+              <img src={cvImagePaths[0]} alt="" loading="lazy" />
             </div>
           </div>
         </section>
 
-        <section
-          id="projetos"
-          className={`screen-section ${activeSection === "projetos" ? "is-active" : activeSectionIndex > 2 ? "is-before" : "is-after"}`}
-        >
-          <div
-            ref={(node) => {
-              sectionShellRefs.current.projetos = node;
-            }}
-            className="section shell section-shell"
-          >
-            <SectionHead
-              kicker={copy.projectSection.kicker}
-              title={copy.projectSection.title}
-            />
-
-            <div className="project-toolbar" data-reveal>
-              {(Object.keys(copy.projectSection.filters) as ProjectFilter[]).map((filter) => (
-                <button
-                  key={filter}
-                  className={`filter-button ${projectFilter === filter ? "is-active" : ""}`}
-                  type="button"
-                  onClick={() => setProjectFilter(filter)}
-                >
-                  {copy.projectSection.filters[filter]}
-                </button>
-              ))}
+        <footer id="contacto" className="contact">
+          <div className="wrap">
+            <h2 data-reveal>{pt ? "Vamos falar?" : "Let’s talk?"}</h2>
+            <a className="email" href={`mailto:${profile.email}`}>{profile.email}<span aria-hidden="true">↗</span></a>
+            <div className="contact-links">
+              <div>
+                <a href={`tel:${profile.phone.replaceAll(" ", "")}`}>{profile.phone}</a>
+                <button type="button" onClick={copyPhone} aria-label={copy.contactSection.phoneCopyIdle} title={copy.contactSection.phoneCopyIdle}>⧉</button>
+                <span className="phone-feedback" role="status">{phoneStatus === "copied" ? copy.contactSection.phoneCopyDone : phoneStatus === "failed" ? (pt ? "Não foi possível copiar" : "Could not copy") : ""}</span>
+              </div>
+              <div>
+                <a href={profile.githubUrl} target="_blank" rel="noreferrer">GitHub ↗</a>
+                <a href={profile.linkedinUrl} target="_blank" rel="noreferrer">LinkedIn ↗</a>
+              </div>
             </div>
-
-            <div className="project-grid">
-              {filteredProjects.map((project, index) => (
-                <ProjectItem
-                  key={project.title}
-                  project={project}
-                  typeLabels={copy.projectSection.typeLabels}
-                  websiteButtonLabel={copy.projectSection.websiteButton}
-                  index={index}
-                />
-              ))}
+            <div className="footer-line mono">
+              <span>{profile.name} © {new Date().getFullYear()}</span>
+              <a href="#inicio">{pt ? "Voltar ao topo" : "Back to top"} ↑</a>
             </div>
           </div>
-        </section>
-
-        <section
-          id="cv"
-          className={`screen-section ${activeSection === "cv" ? "is-active" : activeSectionIndex > 3 ? "is-before" : "is-after"}`}
-        >
-          <div
-            ref={(node) => {
-              sectionShellRefs.current.cv = node;
-            }}
-            className="section shell section-shell cv-shell"
-          >
-            <div className="cv-section-layout" data-reveal>
-              <div className="cv-copy">
-                <span className="section-kicker">{cv.kicker}</span>
-                <h2>{cv.title}</h2>
-                <div className="cv-actions">
-                  <button
-                    className="button primary"
-                    type="button"
-                    onClick={openCvViewer}
-                    disabled={cvImagePaths.length === 0}
-                  >
-                    {cv.view}
-                  </button>
-                  <a className="button ghost" href={cvPath} download>
-                    {cv.download}
-                  </a>
-                </div>
-              </div>
-
-              <div className="cv-file-mark" aria-hidden="true">
-                <span className="cv-file-label">{cv.pageTitle}</span>
-                {Array.from({ length: 9 }).map((_, index) => (
-                  <span className="cv-file-line" key={index} />
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section
-          id="contacto"
-          className={`screen-section ${activeSection === "contacto" ? "is-active" : "is-after"}`}
-        >
-          <div
-            ref={(node) => {
-              sectionShellRefs.current.contacto = node;
-            }}
-            className="section shell section-shell"
-          >
-            <div className="contact-section">
-              <div data-reveal>
-                <span className="section-kicker">{copy.contactSection.kicker}</span>
-                <h2>{copy.contactSection.title}</h2>
-              </div>
-              <div className="contact-links" data-reveal>
-                <a href={`mailto:${profile.email}`}>
-                  <span>{copy.contactSection.emailLabel}</span>
-                  <strong>{profile.email}</strong>
-                </a>
-                <button type="button" onClick={handleCopyPhone}>
-                  <span>{copy.contactSection.phoneLabel}</span>
-                  <strong>{isPhoneCopied ? copy.contactSection.phoneCopyDone : profile.phone}</strong>
-                  <em>{isPhoneCopied ? copy.contactSection.phoneCopyDone : copy.contactSection.phoneCopyIdle}</em>
-                </button>
-                <a href={profile.githubUrl} target="_blank" rel="noreferrer">
-                  <span>{copy.contactSection.githubLabel}</span>
-                  <strong>github.com/gcsilva10</strong>
-                </a>
-                <a href={profile.linkedinUrl} target="_blank" rel="noreferrer">
-                  <span>{copy.contactSection.linkedinLabel}</span>
-                  <strong>LinkedIn</strong>
-                </a>
-              </div>
-            </div>
-          </div>
-        </section>
+        </footer>
       </main>
 
-      <section className={`cv-viewer ${isCvViewerOpen ? "is-open" : ""}`} aria-hidden={!isCvViewerOpen}>
-        <div className="cv-viewer-shell">
-          <div className="cv-viewer-topbar">
-            <button className="button ghost" type="button" onClick={() => setIsCvViewerOpen(false)}>
-              {cv.close}
-            </button>
-            {hasPreviousCvPage ? (
-              <button className="button ghost" type="button" onClick={() => setActiveCvPageIndex((current) => current - 1)}>
-                {cv.previousPage}
-              </button>
-            ) : null}
-            {hasNextCvPage ? (
-              <button className="button ghost" type="button" onClick={() => setActiveCvPageIndex((current) => current + 1)}>
-                {cv.nextPage}
-              </button>
-            ) : null}
-            <a className="button primary" href={cvPath} download>
-              {cv.download}
-            </a>
-          </div>
-
-          <div className="cv-image-frame">
-            <div className="cv-image-header">
-              <span className="section-kicker">{cv.pageTitle}</span>
-              <strong>
-                {cv.pageCounter} {Math.min(activeCvPageIndex + 1, Math.max(cvImagePaths.length, 1))} / {Math.max(cvImagePaths.length, 1)}
-              </strong>
-            </div>
-            {activeCvImagePath ? (
-              <img
-                className="cv-image"
-                src={activeCvImagePath}
-                alt={`${cv.pageTitle} ${activeCvPageIndex + 1}`}
-              />
-            ) : null}
-          </div>
+      <dialog className="cv-dialog" ref={dialog} aria-labelledby="cv-dialog-title">
+        <header>
+          <strong id="cv-dialog-title">{cv.pageTitle}</strong>
+          <form method="dialog"><button className="pill" type="submit">{cv.close} ×</button></form>
+        </header>
+        <div className="cv-page">
+          {cvImagePaths[cvPage] && <img src={cvImagePaths[cvPage]} alt={`${cv.pageTitle}, ${cv.pageCounter.toLowerCase()} ${cvPage + 1}`} />}
         </div>
-      </section>
-
-      <footer className="shell">
-        <span>{new Date().getFullYear()} {profile.name}</span>
-      </footer>
-    </>
-  );
-}
-
-function SectionHead({ kicker, title, text }: { kicker: string; title: string; text?: string }) {
-  return (
-    <div className="section-head" data-reveal>
-      <div>
-        <span className="section-kicker">{kicker}</span>
-        <h2>{title}</h2>
-      </div>
-      {text ? <p>{text}</p> : null}
+        <footer>
+          <button className="pill" type="button" disabled={cvPage === 0} onClick={() => setCvPage(cvPage - 1)}>{cv.previousPage}</button>
+          <span aria-live="polite">{cvPage + 1} / {cvImagePaths.length}</span>
+          <button className="pill" type="button" disabled={cvPage >= cvImagePaths.length - 1} onClick={() => setCvPage(cvPage + 1)}>{cv.nextPage}</button>
+        </footer>
+      </dialog>
     </div>
   );
 }
