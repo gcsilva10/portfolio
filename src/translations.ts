@@ -8,7 +8,7 @@ export type TimelineEntryData = {
   startDate: string;
   endDate: string;
   timelineType: TimelineFilter;
-  type: "Education" | "Degree" | "Master" | "Professional" | "Current";
+  type: "Education" | "Degree" | "Master" | "Professional" | "Current" | "Collaboration";
   title: string;
   description: string;
   imagePath: string;
@@ -77,8 +77,18 @@ export const translations = {
         Master: "Mestrado",
         Professional: "Profissional",
         Current: "Atual",
+        Collaboration: "Colaboração",
       },
       entries: [
+        {
+          startDate: "Setembro 2026",
+          endDate: "Presente",
+          timelineType: "main",
+          type: "Collaboration",
+          title: "Metro Mondego",
+          description: "Serviços de manutenção e cedência do uso do website de horários do Metrobus.",
+          imagePath: "/images/icons/metro-mondego.png",
+        },
         {
           startDate: "Setembro 2009",
           endDate: "Junho 2023",
@@ -366,8 +376,18 @@ export const translations = {
         Master: "Master's",
         Professional: "Professional",
         Current: "Current",
+        Collaboration: "Collaboration",
       },
       entries: [
+        {
+          startDate: "September 2026",
+          endDate: "Present",
+          timelineType: "main",
+          type: "Collaboration",
+          title: "Metro Mondego",
+          description: "Maintenance services and granting Metro Mondego the right to use the Metrobus timetable website.",
+          imagePath: "/images/icons/metro-mondego.png",
+        },
         {
           startDate: "September 2009",
           endDate: "June 2023",
