@@ -12,6 +12,7 @@ export type TimelineEntryData = {
   title: string;
   description: string;
   imagePath: string;
+  logoBackground?: "dark";
 };
 
 export type ProjectItemData = {
@@ -63,7 +64,6 @@ export const translations = {
       identityLabel: "Identidade visual",
     },
     timelineSection: {
-      kicker: "Linha temporal",
       title: "Percurso.",
       startLabel: "Início",
       endLabel: "Fim",
@@ -114,6 +114,7 @@ export const translations = {
           title: "ENSO ORIGINS",
           description: "Estágio de verão em desenvolvimento de software.",
           imagePath: "/images/icons/enso.png",
+          logoBackground: "dark",
         },
         {
           startDate: "Outubro 2025",
@@ -322,7 +323,7 @@ export const translations = {
     terminal: { role: "Software development" },
     nav: {
       inicio: "Home",
-      percurso: "Timeline",
+      percurso: "Journey",
       projetos: "Projects",
       cv: "CV",
       contacto: "Contact",
@@ -352,8 +353,7 @@ export const translations = {
       identityLabel: "Visual identity",
     },
     timelineSection: {
-      kicker: "Timeline",
-      title: "Path.",
+      title: "Journey.",
       startLabel: "Start",
       endLabel: "End",
       filters: {
@@ -403,6 +403,7 @@ export const translations = {
           title: "ENSO ORIGINS",
           description: "Summer internship in software development.",
           imagePath: "/images/icons/enso.png",
+          logoBackground: "dark",
         },
         {
           startDate: "October 2025",

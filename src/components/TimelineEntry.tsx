@@ -2,14 +2,16 @@ import type { TimelineEntryData } from "../translations";
 
 export function TimelineEntry({ entry, typeLabel }: { entry: TimelineEntryData; typeLabel: string }) {
   return (
-    <article className="timeline-item" data-reveal>
-      <div className="timeline-meta">
-        <img src={entry.imagePath} alt="" loading="lazy" />
+    <li className="journey-card">
+      <div className="journey-card-meta">
+        <img src={entry.imagePath} data-logo-background={entry.logoBackground} alt="" loading="lazy" />
         <p className="mono">{entry.startDate} — {entry.endDate}</p>
       </div>
-      <span className="mono timeline-type">{typeLabel}</span>
-      <h3>{entry.title}</h3>
-      <p>{entry.description}</p>
-    </article>
+      <div className="journey-card-body">
+        <span className="mono journey-card-type">{typeLabel}</span>
+        <h3>{entry.title}</h3>
+        <p>{entry.description}</p>
+      </div>
+    </li>
   );
 }

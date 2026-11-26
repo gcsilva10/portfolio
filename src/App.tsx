@@ -5,6 +5,7 @@ import { TerminalIntro } from "./components/TerminalIntro";
 import { TimelineEntry } from "./components/TimelineEntry";
 import { type Language, type ProjectFilter, type ProjectItemData, type TimelineFilter, translations } from "./translations";
 import { useMotion } from "./useMotion";
+import { useJourneyDeck } from "./useJourneyDeck";
 import "./components/project-motion.css";
 
 const sections = ["inicio", "projetos", "percurso", "cv", "contacto"] as const;
@@ -74,7 +75,9 @@ function App() {
   const cursor = useRef<HTMLDivElement>(null);
   const page = useRef<HTMLDivElement>(null);
   const heroHeading = useRef<HTMLHeadingElement>(null);
+  const journey = useRef<HTMLElement>(null);
   const activeSection = useMotion(page, canvas, cursor, sections);
+  useJourneyDeck(journey, timelineFilter, language);
 
   const pt = language === "pt";
   const copy = translations[language];
@@ -191,22 +194,26 @@ function App() {
           </div>
         </section>
 
-        <section id="percurso" className="journey wrap">
-          <div className="journey-heading" data-reveal>
-            <span className="mono">{copy.timelineSection.kicker}</span>
-            <h2>{copy.timelineSection.title}</h2>
-            <div className="filters" role="group" aria-label={copy.nav.percurso}>
-              {(Object.keys(copy.timelineSection.filters) as TimelineFilter[]).map((filter) => (
-                <button key={filter} type="button" aria-pressed={timelineFilter === filter} onClick={() => setTimelineFilter(filter)}>
-                  {copy.timelineSection.filters[filter]}
-                </button>
-              ))}
+        <section id="percurso" className="journey" ref={journey} aria-labelledby="journey-title">
+          <div className="journey-stage">
+            <div className="journey-heading">
+              <h2 id="journey-title">{copy.timelineSection.title}</h2>
+              <div className="journey-controls">
+                <div className="filters" role="group" aria-label={copy.nav.percurso}>
+                  {(Object.keys(copy.timelineSection.filters) as TimelineFilter[]).map((filter) => (
+                    <button key={filter} type="button" aria-pressed={timelineFilter === filter} onClick={() => setTimelineFilter(filter)}>
+                      {copy.timelineSection.filters[filter]}
+                    </button>
+                  ))}
+                </div>
+                <p className="journey-position mono" aria-hidden="true" />
+              </div>
             </div>
-          </div>
-          <div className="timeline" key={timelineFilter}>
-            {timeline.map((entry) => (
-              <TimelineEntry key={`${entry.startDate}-${entry.title}`} entry={entry} typeLabel={copy.timelineSection.typeLabels[entry.type]} />
-            ))}
+            <ol className="journey-deck" key={timelineFilter} role="list">
+              {timeline.map((entry) => (
+                <TimelineEntry key={`${entry.startDate}-${entry.title}`} entry={entry} typeLabel={copy.timelineSection.typeLabels[entry.type]} />
+              ))}
+            </ol>
           </div>
         </section>
 

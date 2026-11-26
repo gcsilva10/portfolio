@@ -129,12 +129,6 @@ export function useMotion<T extends string>(
       page.style.setProperty("--portrait-angle", `${4 - heroProgress * 12}deg`);
       page.style.setProperty("--hero-background-progress", String(backgroundProgress));
 
-      const journey = sectionElements[2]?.getBoundingClientRect();
-      if (journey) {
-        const ratio = (viewHeight * 0.65 - journey.top) / journey.height;
-        page.style.setProperty("--timeline-progress", `${Math.min(1, Math.max(0, ratio)) * 100}%`);
-      }
-
       const bounds = scene.getBoundingClientRect();
       if (bounds.bottom < 0 || bounds.top > viewHeight + 150) return;
       updateProjectEntry(viewHeight);
