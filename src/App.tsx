@@ -3,6 +3,7 @@ import { cvImagePaths, cvPath } from "./content";
 import { ProjectItem } from "./components/ProjectItem";
 import { TimelineEntry } from "./components/TimelineEntry";
 import { type Language, type ProjectFilter, type TimelineFilter, translations } from "./translations";
+import { useMotion } from "./useMotion";
 
 const sections = ["inicio", "projetos", "percurso", "cv", "contacto"] as const;
 
@@ -64,6 +65,11 @@ function App() {
   const [cvPage, setCvPage] = useState(0);
   const [phoneStatus, setPhoneStatus] = useState<"idle" | "copied" | "failed">("idle");
   const dialog = useRef<HTMLDialogElement>(null);
+  const canvas = useRef<HTMLCanvasElement>(null);
+  const cursor = useRef<HTMLDivElement>(null);
+  const page = useRef<HTMLDivElement>(null);
+  const activeSection = useMotion(page, canvas, cursor, sections);
+
   const pt = language === "pt";
   const copy = translations[language];
   const profile = copy.profile;
@@ -94,13 +100,14 @@ function App() {
   }
 
   return (
-    <div className="site">
+    <div className="site" ref={page}>
+      <div className="cursor" ref={cursor} aria-hidden="true"><span /></div>
       <a className="skip-link" href="#main">{pt ? "Saltar para o conteúdo" : "Skip to content"}</a>
       <header className="site-header">
         <a className="wordmark" href="#inicio" aria-label={profile.name}>gs<span>.</span></a>
         <nav aria-label={pt ? "Navegação principal" : "Main navigation"}>
           {sections.slice(1).map((id) => (
-            <a key={id} href={`#${id}`}>
+            <a key={id} href={`#${id}`} aria-current={activeSection === id ? "location" : undefined}>
               {copy.nav[id]}
             </a>
           ))}
@@ -112,6 +119,7 @@ function App() {
             </button>
           ))}
         </div>
+        <div className="read-progress" aria-hidden="true" />
       </header>
 
       <main id="main">
@@ -136,6 +144,13 @@ function App() {
             <a className="hero-jump" href="#projetos"><span aria-hidden="true">↓</span>{copy.hero.viewProjects}</a>
           </div>
         </section>
+
+        <div className="motion-scene" aria-hidden="true">
+          <div className="motion-stage">
+            <canvas ref={canvas} />
+            <span className="scene-cross">+</span><span className="scene-cross">+</span>
+          </div>
+        </div>
 
         <section id="projetos" className="work">
           <div className="wrap">
