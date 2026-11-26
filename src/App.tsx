@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import { cvImagePaths, cvPath } from "./content";
-import { ProjectItem } from "./components/ProjectItem";
+import { ProjectDialog, ProjectItem } from "./components/ProjectItem";
 import { TerminalIntro } from "./components/TerminalIntro";
 import { TimelineEntry } from "./components/TimelineEntry";
-import { type Language, type ProjectFilter, type TimelineFilter, translations } from "./translations";
+import { type Language, type ProjectFilter, type ProjectItemData, type TimelineFilter, translations } from "./translations";
 import { useMotion } from "./useMotion";
+import "./components/project-motion.css";
 
 const sections = ["inicio", "projetos", "percurso", "cv", "contacto"] as const;
 
@@ -63,10 +64,12 @@ function App() {
   const [showIntro, setShowIntro] = useState(() => !window.location.hash || window.location.hash === "#inicio");
   const [language, setLanguage] = useState<Language>("pt");
   const [projectFilter, setProjectFilter] = useState<ProjectFilter>("pessoal");
+  const [selectedProject, setSelectedProject] = useState<{ project: ProjectItemData; index: number } | null>(null);
   const [timelineFilter, setTimelineFilter] = useState<TimelineFilter>("main");
   const [cvPage, setCvPage] = useState(0);
   const [phoneStatus, setPhoneStatus] = useState<"idle" | "copied" | "failed">("idle");
   const dialog = useRef<HTMLDialogElement>(null);
+  const projectOpener = useRef<HTMLButtonElement>(null);
   const canvas = useRef<HTMLCanvasElement>(null);
   const cursor = useRef<HTMLDivElement>(null);
   const page = useRef<HTMLDivElement>(null);
@@ -152,17 +155,21 @@ function App() {
           </div>
         </section>
 
-        <div className="motion-scene" aria-hidden="true">
-          <div className="motion-stage">
-            <canvas ref={canvas} />
-            <span className="scene-cross">+</span><span className="scene-cross">+</span>
-          </div>
-        </div>
-
         <section id="projetos" className="work">
-          <div className="wrap">
+          <div className="motion-scene">
+            <div className="motion-stage">
+              <canvas ref={canvas} tabIndex={0} role="group" aria-label={copy.hero.shapeLabel}
+                aria-keyshortcuts="ArrowLeft ArrowRight ArrowUp ArrowDown Home" />
+            </div>
+          </div>
+          <div className="work-content wrap">
             <div className="section-top" data-reveal>
-              <h2>{copy.projectSection.title}</h2>
+              <div className="work-title">
+                <h2>{copy.projectSection.title}</h2>
+                <p className="project-count mono" role="status">
+                  <span key={projectFilter}>{projects.length} {copy.projectSection.countLabel}</span>
+                </p>
+              </div>
               <div className="filters" role="group" aria-label={copy.nav.projetos}>
                 {(Object.keys(copy.projectSection.filters) as ProjectFilter[]).map((filter) => (
                   <button key={filter} type="button" aria-pressed={projectFilter === filter} onClick={() => setProjectFilter(filter)}>
@@ -173,7 +180,12 @@ function App() {
             </div>
             <div className="project-grid" key={projectFilter}>
               {projects.map((project, index) => (
-                <ProjectItem key={project.title} project={project} index={index} websiteButtonLabel={copy.projectSection.websiteButton} />
+                <ProjectItem key={project.title} project={project} index={index}
+                  websiteButtonLabel={copy.projectSection.websiteButton} exploreLabel={copy.projectSection.explore}
+                  onExplore={(opener) => {
+                    projectOpener.current = opener;
+                    setSelectedProject({ project, index });
+                  }} />
               ))}
             </div>
           </div>
@@ -238,6 +250,13 @@ function App() {
           </div>
         </footer>
       </main>
+
+      <ProjectDialog selection={selectedProject} websiteButtonLabel={copy.projectSection.websiteButton}
+        detailLabels={copy.projectSection.detailLabels} closeLabel={cv.close} onClose={() => {
+          setSelectedProject(null);
+          projectOpener.current?.focus({ preventScroll: true });
+          projectOpener.current = null;
+        }} />
 
       <dialog className="cv-dialog" ref={dialog} aria-labelledby="cv-dialog-title">
         <header>
