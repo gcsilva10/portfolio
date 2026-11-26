@@ -8,10 +8,11 @@ export type TimelineEntryData = {
   startDate: string;
   endDate: string;
   timelineType: TimelineFilter;
-  type: "Education" | "Degree" | "Master" | "Professional" | "Current";
+  type: "Education" | "Degree" | "Master" | "Professional" | "Current" | "Collaboration";
   title: string;
   description: string;
   imagePath: string;
+  logoBackground?: "dark";
 };
 
 export type ProjectItemData = {
@@ -21,12 +22,16 @@ export type ProjectItemData = {
   frameworks: string[];
   company?: string;
   imagePath?: string;
+  logoBackground?: "dark";
+  previewImagePath?: string;
   websiteUrl?: string;
+  details?: { problem?: string; approach?: string; result?: string };
 };
 
 export const translations = {
   pt: {
     languageLabel: "Idioma",
+    terminal: { role: "Desenvolvimento de software" },
     nav: {
       inicio: "Início",
       percurso: "Percurso",
@@ -50,16 +55,15 @@ export const translations = {
       locationText: "Portugal",
     },
     hero: {
-      eyebrow: "Portfolio pessoal interativo",
       ageLabel: "Idade",
       ageUnit: "anos",
       exploreTimeline: "Explorar percurso",
       viewProjects: "Ver projetos",
+      shapeLabel: "Forma interativa. Usa as setas para rodar ou inclinar e Home para repor.",
       viewContact: "Contactos",
       identityLabel: "Identidade visual",
     },
     timelineSection: {
-      kicker: "Linha temporal",
       title: "Percurso.",
       startLabel: "Início",
       endLabel: "Fim",
@@ -73,8 +77,18 @@ export const translations = {
         Master: "Mestrado",
         Professional: "Profissional",
         Current: "Atual",
+        Collaboration: "Colaboração",
       },
       entries: [
+        {
+          startDate: "Setembro 2026",
+          endDate: "Presente",
+          timelineType: "main",
+          type: "Collaboration",
+          title: "Metro Mondego",
+          description: "Serviços de manutenção e cedência do uso do website de horários do Metrobus.",
+          imagePath: "/images/icons/metro-mondego.png",
+        },
         {
           startDate: "Setembro 2009",
           endDate: "Junho 2023",
@@ -110,6 +124,7 @@ export const translations = {
           title: "ENSO ORIGINS",
           description: "Estágio de verão em desenvolvimento de software.",
           imagePath: "/images/icons/enso.png",
+          logoBackground: "dark",
         },
         {
           startDate: "Outubro 2025",
@@ -181,24 +196,32 @@ export const translations = {
         faculdade: "Faculdade",
       },
       websiteButton: "Ver website",
+      explore: "Explorar projeto",
+      countLabel: "projetos",
+      detailLabels: { problem: "Problema", approach: "Abordagem", result: "Resultado" },
       projects: [
         {
           title: "Website de Portfólio",
           type: "pessoal",
           description: "Portfólio pessoal bilingue e interativo para apresentar o meu percurso, projetos, CV e contactos.",
+          previewImagePath: "/images/projects/portfolio-preview.jpg",
+          details: {
+            problem: "Reunir projetos, percurso e CV num só sítio, acessível a leitores em português e inglês.",
+            approach: "Criei uma página em React com filtros por categoria, navegação por secção e um visualizador de CV.",
+          },
           frameworks: ["React", "TypeScript", "Vite"],
-        },
-        {
-          title: "Dashboard Pessoal",
-          type: "pessoal",
-          description: "Website pessoal para organizar horários, tarefas, finanças e mais.",
-          frameworks: ["React", "TypeScript"],
         },
         {
           title: "Website de Horários do MetroBus",
           type: "pessoal",
-          description: "Website com cerca de 3000 utilizadores por dia, com horários e rotas de autocarros em tempo real.",
-          frameworks: ["Next.js", "Maps", "API"],
+          description: "Consulta de horários, paragens e percursos do MetroBus, com cerca de 3 000 utilizadores por dia.",
+          previewImagePath: "/images/projects/metrobus-preview.jpg",
+          details: {
+            problem: "Dar aos passageiros acesso a horários e rotas atualizados para planearem as suas viagens.",
+            approach: "A interface usa React e TypeScript com Vite. Os mapas são apresentados com Leaflet e os lembretes de viagem são geridos por funções na Vercel.",
+            result: "O website tem cerca de 3 000 utilizadores por dia.",
+          },
+          frameworks: ["React", "TypeScript", "Vite", "Leaflet", "Vercel Functions"],
           websiteUrl: "https://planearviagem.metromondego.pt",
         },
         {
@@ -208,6 +231,7 @@ export const translations = {
           frameworks: ["React", "TypeScript"],
           company: "ENSO ORIGINS",
           imagePath: "/images/icons/enso.png",
+          logoBackground: "dark",
         },
         {
           title: "Website do NEI",
@@ -216,7 +240,7 @@ export const translations = {
           frameworks: ["Next.js", "Maps", "API"],
           websiteUrl: "https://nei.dei.uc.pt/",
           company: "NEI",
-          imagePath: "/images/icons/nei.png",
+          previewImagePath: "/images/projects/nei-preview.jpg",
         },
         {
           title: "Projeto Manajer",
@@ -232,6 +256,15 @@ export const translations = {
           description: "Implementação da landing page e navbar, com correção de vários bugs no website.",
           frameworks: ["Tailwind CSS", "React"],
           websiteUrl: "https://acordacellofestival.com/",
+          company: "JeKnowledge",
+          previewImagePath: "/images/projects/acorda-preview.jpg",
+        },
+        {
+          title: "Dzain It!",
+          type: "emprego",
+          description: "Implementei a landing page da maratona de design e integrei o carregamento de imagens a partir de um bucket de armazenamento de objetos.",
+          frameworks: ["Object storage"],
+          websiteUrl: "https://dzain-it.com/",
           company: "JeKnowledge",
           imagePath: "/images/icons/jek.png",
         },
@@ -297,9 +330,10 @@ export const translations = {
   },
   en: {
     languageLabel: "Language",
+    terminal: { role: "Software development" },
     nav: {
       inicio: "Home",
-      percurso: "Timeline",
+      percurso: "Journey",
       projetos: "Projects",
       cv: "CV",
       contacto: "Contact",
@@ -320,17 +354,16 @@ export const translations = {
       locationText: "Portugal",
     },
     hero: {
-      eyebrow: "Interactive personal portfolio",
       ageLabel: "Age",
       ageUnit: "years old",
       exploreTimeline: "Explore timeline",
       viewProjects: "View projects",
+      shapeLabel: "Interactive shape. Use the arrow keys to rotate or tilt, and Home to reset.",
       viewContact: "Contacts",
       identityLabel: "Visual identity",
     },
     timelineSection: {
-      kicker: "Timeline",
-      title: "Path.",
+      title: "Journey.",
       startLabel: "Start",
       endLabel: "End",
       filters: {
@@ -343,8 +376,18 @@ export const translations = {
         Master: "Master's",
         Professional: "Professional",
         Current: "Current",
+        Collaboration: "Collaboration",
       },
       entries: [
+        {
+          startDate: "September 2026",
+          endDate: "Present",
+          timelineType: "main",
+          type: "Collaboration",
+          title: "Metro Mondego",
+          description: "Maintenance services and granting Metro Mondego the right to use the Metrobus timetable website.",
+          imagePath: "/images/icons/metro-mondego.png",
+        },
         {
           startDate: "September 2009",
           endDate: "June 2023",
@@ -380,6 +423,7 @@ export const translations = {
           title: "ENSO ORIGINS",
           description: "Summer internship in software development.",
           imagePath: "/images/icons/enso.png",
+          logoBackground: "dark",
         },
         {
           startDate: "October 2025",
@@ -451,24 +495,32 @@ export const translations = {
         faculdade: "University",
       },
       websiteButton: "View website",
+      explore: "Explore project",
+      countLabel: "projects",
+      detailLabels: { problem: "Problem", approach: "Approach", result: "Result" },
       projects: [
         {
           title: "Portfolio Website",
           type: "pessoal",
           description: "Bilingual, interactive personal portfolio showcasing my background, projects, CV and contact details.",
+          previewImagePath: "/images/projects/portfolio-preview.jpg",
+          details: {
+            problem: "Bring my projects, background and CV together in one place for readers in Portuguese and English.",
+            approach: "I built a single React page with category filters, section navigation and a CV viewer.",
+          },
           frameworks: ["React", "TypeScript", "Vite"],
-        },
-        {
-          title: "Personal Dashboard",
-          type: "pessoal",
-          description: "Personal website to organize my schedule, tasks, finances and more.",
-          frameworks: ["React", "TypeScript"],
         },
         {
           title: "MetroBus Schedule",
           type: "pessoal",
-          description: "Website with around 3,000 users per day, providing real-time bus schedules and route information.",
-          frameworks: ["Next.js", "Maps", "API"],
+          description: "MetroBus timetables, stops and routes, with around 3,000 users per day.",
+          previewImagePath: "/images/projects/metrobus-preview.jpg",
+          details: {
+            problem: "Give passengers up-to-date schedules and routes so they can plan their trips.",
+            approach: "The site uses React and TypeScript with Vite, Leaflet for interactive maps, and Vercel Functions to handle trip reminders.",
+            result: "The website has around 3,000 users per day.",
+          },
+          frameworks: ["React", "TypeScript", "Vite", "Leaflet", "Vercel Functions"],
           websiteUrl: "https://planearviagem.metromondego.pt",
         },
         {
@@ -478,6 +530,7 @@ export const translations = {
           frameworks: ["React", "TypeScript"],
           company: "ENSO ORIGINS",
           imagePath: "/images/icons/enso.png",
+          logoBackground: "dark",
         },
         {
           title: "NEI Website",
@@ -486,7 +539,7 @@ export const translations = {
           frameworks: ["Next.js", "Maps", "API"],
           websiteUrl: "https://nei.dei.uc.pt/",
           company: "NEI",
-          imagePath: "/images/icons/nei.png",
+          previewImagePath: "/images/projects/nei-preview.jpg",
         },
         {
           title: "Manajer Project",
@@ -502,6 +555,15 @@ export const translations = {
           description: "Landing page and navbar implementation, plus bug fixes across the website.",
           frameworks: ["Tailwind CSS", "React"],
           websiteUrl: "https://acordacellofestival.com/",
+          company: "JeKnowledge",
+          previewImagePath: "/images/projects/acorda-preview.jpg",
+        },
+        {
+          title: "Dzain It!",
+          type: "emprego",
+          description: "Built the design marathon’s landing page and integrated image loading from an object storage bucket.",
+          frameworks: ["Object storage"],
+          websiteUrl: "https://dzain-it.com/",
           company: "JeKnowledge",
           imagePath: "/images/icons/jek.png",
         },

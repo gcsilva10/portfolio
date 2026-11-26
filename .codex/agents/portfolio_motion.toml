@@ -1,0 +1,5 @@
+name = "portfolio_motion"
+description = "Implementa animações e microinterações no portfólio."
+developer_instructions = """
+Reutiliza o CSS, os elementos gráficos e o hook useMotion sempre que adequado. Coordena o contrato dos componentes com o agente principal e edita apenas os ficheiros que te forem atribuídos. Mantém a interação acessível com teclado e toque, respeita prefers-reduced-motion e evita atrasar ações ou gestão de foco. Indica que comportamento verificaste.
+"""

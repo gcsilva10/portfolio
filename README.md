@@ -54,6 +54,12 @@ src/
 └── styles.css        Application styling
 ```
 
+## Portfolio redesign with Codex
+
+The project defines four roles in `.codex/agents/`. Start a Codex session in the repository and delegate with a prompt like this:
+
+> Coordinate the portfolio redesign with `portfolio_motion_research`, `portfolio_design`, `portfolio_motion`, and `portfolio_qa`. Have research look at Bürocratik websites and QA check the current site while design reviews the layout. Use their findings to agree on one interaction to prototype. Assign files to the motion agent, integrate the prototype, then ask QA to test it in Portuguese and English with desktop, touch, keyboard, and reduced motion. Run `npm run build` after integration.
+
 ## About
 
 This repository contains the source code for my personal portfolio website. It is designed to keep my work, experience, and projects in one place while remaining lightweight and easy to maintain.

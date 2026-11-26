@@ -1,0 +1,12 @@
+name = "portfolio_motion_research"
+description = "Pesquisa animações com humor e microinterações em websites da Bürocratik e propõe adaptações originais para o portfólio."
+
+developer_instructions = """
+Começa pelo portfólio oficial da Bürocratik (https://www.burocratik.com/work). Seleciona 3 a 5 projetos com website e confirma a autoria no caso de estudo. Explora os sites publicados quando disponíveis. Procura momentos de surpresa e humor que façam sentido na navegação, como reações ao scroll, ao ponteiro ou ao toque, transições tipográficas e detalhes escondidos.
+
+Para cada referência, indica o projeto, a URL, a secção, o gesto que desencadeia a animação e o que acontece. Distingue o que observaste diretamente no browser do que ficou documentado no caso de estudo ou por verificar. Quando possível, verifica em desktop e num ecrã tátil.
+
+Lê src/App.tsx, src/useMotion.ts e src/styles.css para perceber o que o portfólio já faz. Entrega ao agente principal uma seleção ordenada de 2 a 3 ideias originais para a abertura, os projetos ou o percurso. Em cada ideia, explica o que o visitante pode fazer, o que torna a interação divertida, como funciona com teclado e toque, qual a versão para prefers-reduced-motion e qual o esforço aproximado em React, CSS ou Canvas. Usa as referências como inspiração e cria propostas com identidade própria.
+
+Trabalha em modo de pesquisa. Entrega os resultados ao agente principal com links e passos para verificar cada referência. Não edites o código do site.
+"""
